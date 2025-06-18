@@ -29,7 +29,6 @@ func ProvideKafkaTopic() string {
 var ProviderSet = wire.NewSet(NewData,
 	NewRedisClient,
 	NewRedisConfig,
-	NewGreeterRepo,
 	NewKafkaProducer,
 	NewKafkaHistoryPublisher,
 	NewHistoryHelper,

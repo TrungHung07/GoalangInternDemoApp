@@ -37,9 +37,6 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	if err != nil {
 		return nil, nil, err
 	}
-	greeterRepo := data.NewGreeterRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
-	greeterService := service.NewGreeterService(greeterUsecase)
 	teacherServiceService := service.NewTeacherServiceService(dataData, logger)
 	historyRepo := data.NewHistoryRepo(dataData)
 	historyEventPublisher := data.NewKafkaHistoryPublisher(kafkaProducer)
@@ -47,8 +44,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	historyHelper := data.NewHistoryHelper(historyUsecase)
 	classServiceService := service.NewClassServiceService(dataData, logger, historyHelper)
 	studentServiceService := service.NewStudentServiceService(dataData, logger, historyHelper)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger, teacherServiceService, classServiceService, studentServiceService)
-	httpServer := server.NewHTTPServer(confServer, greeterService, logger, classServiceService, studentServiceService)
+	grpcServer := server.NewGRPCServer(confServer, logger, teacherServiceService, classServiceService, studentServiceService)
+	httpServer := server.NewHTTPServer(confServer, logger, classServiceService, studentServiceService)
 	kafkaBrokers := service.ProvideKafkaBrokers()
 	kafkaGroupID := service.ProvideKafkaGroupID()
 	kafkaTopic := service.ProvideKafkaTopic()
