@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package helloworld.v1;
+
+option go_package = "DemoApp/api/helloworld/v1;v1";
+
+// Request để lấy 1 giáo viên theo ID
+message GetTeacherRequest {
+  int64 id = 1;
+}
+
+// Response khi trả về thông tin giáo viên
+message TeacherReply {
+  int64 id = 1;
+  string name = 2;
+  string email =3;
+  int32 grade = 4; 
+}
+
+// Request để tạo mới giáo viên
+message CreateTeacherRequest {
+  string name = 1;
+  string email = 2;
+  int32 grade = 3;
+
+}
+
+message UpdateTeacherRequest {
+  int64 id = 1;
+  string name = 2;
+  string email = 3;
+  int32 grade = 4;
+}
+
+message DeleteTeacherRequest {
+  int64 id = 1; // ID của giáo viên cần xóa
+}
+
+// Request để lấy danh sách tất cả giáo viên
+message ListTeachersRequest {}
+
+
+// Response khi tạo xong giáo viên
+message CreateTeacherReply {
+  string message = 1;
+}
+
+message DeleteTeacherReply {
+  string message = 1; // Thông báo kết quả xóa
+}
+
+message UpdateTeacherReply {
+  string message = 1; // Thông báo kết quả cập nhật
+}
+
+
+
+
+// Response trả về danh sách giáo viên
+message ListTeachersReply {
+  repeated TeacherReply teachers = 1;
+}
+
+// gRPC Service định nghĩa các hàm cho Teacher
+service TeacherService {
+  rpc GetTeacher(GetTeacherRequest) returns (TeacherReply);
+  rpc CreateTeacher(CreateTeacherRequest) returns (CreateTeacherReply);
+  rpc ListTeachers(ListTeachersRequest) returns (ListTeachersReply);
+  rpc UpdateTeacher(UpdateTeacherRequest) returns (UpdateTeacherReply);
+  rpc DeleteTeacher(DeleteTeacherRequest) returns (DeleteTeacherReply);
+}
+
+

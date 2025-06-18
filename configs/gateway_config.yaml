@@ -1,0 +1,16 @@
+server:
+  http:
+    addr: 0.0.0.0:8001  # Port HTTP riêng cho gateway
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:9003  # Port gRPC riêng cho gateway
+    timeout: 1s
+data:
+  service_endpoint: "localhost:9000"  # Trỏ đến port gRPC của service chính
+  database:
+    driver: postgres
+    source: ""  # Có thể để trống hoặc cấu hình nếu gateway cần dùng database
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s

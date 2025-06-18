@@ -1,0 +1,69 @@
+syntax = "proto3";
+package helloworld.v1;
+
+import "api/helloworld/v1/class.proto";
+
+option go_package = "DemoApp/api/helloworld/v1;v1";
+
+
+
+message CreateStudentRequest {
+    string name = 1; 
+    int64 class_id = 2; 
+}
+
+message UpdateStudentRequest {
+    int64 id = 1; // ID của học sinh cần cập nhật
+    string name = 2; // Tên học sinh mới
+    int64 class_id = 3; // ID lớp học mới
+}
+
+message DeleteStudentRequest {
+    int64 id = 1; // ID của học sinh cần xóa
+}
+
+message ListStudentRequest {
+    uint32 page = 1; // Số trang
+    uint32 page_size = 2; // Số lượng bản ghi trên mỗi trang
+    optional string name = 3; // Tên học sinh để lọc
+    optional int64 class_id = 4; // ID lớp học để lọc
+    optional bool is_deleted = 5; // Lọc theo trạng thái xóa
+    optional string keyword = 6; // Từ khóa tìm kiếm
+}
+
+message GetStudentRequest {
+    int64 id = 1; // ID của học sinh cần lấy thông tin
+}
+
+message ListStudentReply {
+    repeated StudentData items = 1;
+    int64 total = 2; 
+}
+
+message GetStudentReply {
+    StudentData student = 1; // Thông tin học sinh
+}
+
+message CreateStudentReply {
+    string message = 1; // Thông báo kết quả tạo học sinh
+}
+
+message UpdateStudentReply {
+    string message = 1; // Thông báo kết quả cập nhật học sinh
+}
+
+message DeleteStudentReply {
+    string message = 1; // Thông báo kết quả xóa học sinh
+}
+
+message StudentData {
+    int64 id = 1;
+    string name = 2;
+    int64 class_id = 3; // ID lớp học của học sinh
+    string class_name = 4; // Tên lớp học của học sinh
+    optional bool is_deleted = 5; // Trạng thái xóa của học sinh
+}
+
+
+
+

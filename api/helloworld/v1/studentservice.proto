@@ -1,0 +1,37 @@
+syntax = "proto3";
+package helloworld.v1;
+
+import "api/helloworld/v1/student.proto";
+import "google/api/annotations.proto";
+option go_package = "DemoApp/api/helloworld/v1;v1";
+
+service StudentService {
+    rpc CreateStudent(CreateStudentRequest) returns (CreateStudentReply){
+        option (google.api.http) = {
+            post: "api/v1/students"
+            body: "*"
+        };
+    }
+    rpc UpdateStudent(UpdateStudentRequest) returns (UpdateStudentReply){
+        option (google.api.http) = {
+            put: "api/v1/students/{id}"
+            body: "*"
+        };
+    }
+    rpc DeleteStudent(DeleteStudentRequest) returns (DeleteStudentReply){
+        option (google.api.http) = {
+            delete: "api/v1/students/{id}"
+        };
+    }
+    rpc ListStudent(ListStudentRequest) returns (ListStudentReply){
+        option (google.api.http) = {
+            post: "api/v1/students/list",
+            body: "*"
+        };
+    }
+    rpc GetStudent(GetStudentRequest) returns (GetStudentReply){
+        option (google.api.http) = {
+            get: "api/v1/students/{id}"
+        };
+    }
+}
