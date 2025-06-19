@@ -7,6 +7,7 @@ import (
 	"DemoApp/ent/history"
 	"DemoApp/ent/schema"
 	"DemoApp/ent/student"
+	"DemoApp/ent/teacher"
 	"time"
 )
 
@@ -32,4 +33,14 @@ func init() {
 	studentDescIsDeleted := studentFields[2].Descriptor()
 	// student.DefaultIsDeleted holds the default value on creation for the is_deleted field.
 	student.DefaultIsDeleted = studentDescIsDeleted.Default.(bool)
+	teacherFields := schema.Teacher{}.Fields()
+	_ = teacherFields
+	// teacherDescAge is the schema descriptor for age field.
+	teacherDescAge := teacherFields[3].Descriptor()
+	// teacher.AgeValidator is a validator for the "age" field. It is called by the builders before save.
+	teacher.AgeValidator = teacherDescAge.Validators[0].(func(int) error)
+	// teacherDescIsDeleted is the schema descriptor for is_deleted field.
+	teacherDescIsDeleted := teacherFields[4].Descriptor()
+	// teacher.DefaultIsDeleted holds the default value on creation for the is_deleted field.
+	teacher.DefaultIsDeleted = teacherDescIsDeleted.Default.(bool)
 }

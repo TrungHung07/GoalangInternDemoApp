@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"DemoApp/ent/class"
 	"DemoApp/ent/teacher"
 	"fmt"
 	"strings"
@@ -20,9 +21,36 @@ type Teacher struct {
 	Name string `json:"name,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
-	// Grade holds the value of the "grade" field.
-	Grade        int `json:"grade,omitempty"`
+	// ClassID holds the value of the "class_id" field.
+	ClassID int `json:"class_id,omitempty"`
+	// Age holds the value of the "age" field.
+	Age int `json:"age,omitempty"`
+	// IsDeleted holds the value of the "is_deleted" field.
+	IsDeleted bool `json:"is_deleted,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the TeacherQuery when eager-loading is set.
+	Edges        TeacherEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// TeacherEdges holds the relations/edges for other nodes in the graph.
+type TeacherEdges struct {
+	// Classes holds the value of the classes edge.
+	Classes *Class `json:"classes,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// ClassesOrErr returns the Classes value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TeacherEdges) ClassesOrErr() (*Class, error) {
+	if e.Classes != nil {
+		return e.Classes, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: class.Label}
+	}
+	return nil, &NotLoadedError{edge: "classes"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -30,7 +58,9 @@ func (*Teacher) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case teacher.FieldID, teacher.FieldGrade:
+		case teacher.FieldIsDeleted:
+			values[i] = new(sql.NullBool)
+		case teacher.FieldID, teacher.FieldClassID, teacher.FieldAge:
 			values[i] = new(sql.NullInt64)
 		case teacher.FieldName, teacher.FieldEmail:
 			values[i] = new(sql.NullString)
@@ -67,11 +97,23 @@ func (t *Teacher) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.Email = value.String
 			}
-		case teacher.FieldGrade:
+		case teacher.FieldClassID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field grade", values[i])
+				return fmt.Errorf("unexpected type %T for field class_id", values[i])
 			} else if value.Valid {
-				t.Grade = int(value.Int64)
+				t.ClassID = int(value.Int64)
+			}
+		case teacher.FieldAge:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field age", values[i])
+			} else if value.Valid {
+				t.Age = int(value.Int64)
+			}
+		case teacher.FieldIsDeleted:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_deleted", values[i])
+			} else if value.Valid {
+				t.IsDeleted = value.Bool
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -84,6 +126,11 @@ func (t *Teacher) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (t *Teacher) Value(name string) (ent.Value, error) {
 	return t.selectValues.Get(name)
+}
+
+// QueryClasses queries the "classes" edge of the Teacher entity.
+func (t *Teacher) QueryClasses() *ClassQuery {
+	return NewTeacherClient(t.config).QueryClasses(t)
 }
 
 // Update returns a builder for updating this Teacher.
@@ -115,8 +162,14 @@ func (t *Teacher) String() string {
 	builder.WriteString("email=")
 	builder.WriteString(t.Email)
 	builder.WriteString(", ")
-	builder.WriteString("grade=")
-	builder.WriteString(fmt.Sprintf("%v", t.Grade))
+	builder.WriteString("class_id=")
+	builder.WriteString(fmt.Sprintf("%v", t.ClassID))
+	builder.WriteString(", ")
+	builder.WriteString("age=")
+	builder.WriteString(fmt.Sprintf("%v", t.Age))
+	builder.WriteString(", ")
+	builder.WriteString("is_deleted=")
+	builder.WriteString(fmt.Sprintf("%v", t.IsDeleted))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -4,6 +4,7 @@ package teacher
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -15,10 +16,23 @@ const (
 	FieldName = "name"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
-	// FieldGrade holds the string denoting the grade field in the database.
-	FieldGrade = "grade"
+	// FieldClassID holds the string denoting the class_id field in the database.
+	FieldClassID = "class_id"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
+	// FieldIsDeleted holds the string denoting the is_deleted field in the database.
+	FieldIsDeleted = "is_deleted"
+	// EdgeClasses holds the string denoting the classes edge name in mutations.
+	EdgeClasses = "classes"
 	// Table holds the table name of the teacher in the database.
 	Table = "teachers"
+	// ClassesTable is the table that holds the classes relation/edge.
+	ClassesTable = "teachers"
+	// ClassesInverseTable is the table name for the Class entity.
+	// It exists in this package in order to avoid circular dependency with the "class" package.
+	ClassesInverseTable = "classes"
+	// ClassesColumn is the table column denoting the classes relation/edge.
+	ClassesColumn = "class_id"
 )
 
 // Columns holds all SQL columns for teacher fields.
@@ -26,7 +40,9 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldEmail,
-	FieldGrade,
+	FieldClassID,
+	FieldAge,
+	FieldIsDeleted,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -38,6 +54,13 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
+	AgeValidator func(int) error
+	// DefaultIsDeleted holds the default value on creation for the "is_deleted" field.
+	DefaultIsDeleted bool
+)
 
 // OrderOption defines the ordering options for the Teacher queries.
 type OrderOption func(*sql.Selector)
@@ -57,7 +80,31 @@ func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEmail, opts...).ToFunc()
 }
 
-// ByGrade orders the results by the grade field.
-func ByGrade(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldGrade, opts...).ToFunc()
+// ByClassID orders the results by the class_id field.
+func ByClassID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClassID, opts...).ToFunc()
+}
+
+// ByAge orders the results by the age field.
+func ByAge(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAge, opts...).ToFunc()
+}
+
+// ByIsDeleted orders the results by the is_deleted field.
+func ByIsDeleted(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsDeleted, opts...).ToFunc()
+}
+
+// ByClassesField orders the results by classes field.
+func ByClassesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newClassesStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newClassesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ClassesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, ClassesTable, ClassesColumn),
+	)
 }

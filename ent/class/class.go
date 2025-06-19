@@ -20,6 +20,8 @@ const (
 	FieldIsDeleted = "is_deleted"
 	// EdgeStudents holds the string denoting the students edge name in mutations.
 	EdgeStudents = "students"
+	// EdgeTeachers holds the string denoting the teachers edge name in mutations.
+	EdgeTeachers = "teachers"
 	// Table holds the table name of the class in the database.
 	Table = "classes"
 	// StudentsTable is the table that holds the students relation/edge.
@@ -29,6 +31,13 @@ const (
 	StudentsInverseTable = "students"
 	// StudentsColumn is the table column denoting the students relation/edge.
 	StudentsColumn = "class_id"
+	// TeachersTable is the table that holds the teachers relation/edge.
+	TeachersTable = "teachers"
+	// TeachersInverseTable is the table name for the Teacher entity.
+	// It exists in this package in order to avoid circular dependency with the "teacher" package.
+	TeachersInverseTable = "teachers"
+	// TeachersColumn is the table column denoting the teachers relation/edge.
+	TeachersColumn = "class_id"
 )
 
 // Columns holds all SQL columns for class fields.
@@ -90,10 +99,31 @@ func ByStudents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newStudentsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByTeachersCount orders the results by teachers count.
+func ByTeachersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTeachersStep(), opts...)
+	}
+}
+
+// ByTeachers orders the results by teachers terms.
+func ByTeachers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTeachersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newStudentsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(StudentsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, StudentsTable, StudentsColumn),
+	)
+}
+func newTeachersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TeachersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, TeachersTable, TeachersColumn),
 	)
 }

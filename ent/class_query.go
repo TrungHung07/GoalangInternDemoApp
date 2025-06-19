@@ -6,6 +6,7 @@ import (
 	"DemoApp/ent/class"
 	"DemoApp/ent/predicate"
 	"DemoApp/ent/student"
+	"DemoApp/ent/teacher"
 	"context"
 	"database/sql/driver"
 	"fmt"
@@ -25,6 +26,7 @@ type ClassQuery struct {
 	inters       []Interceptor
 	predicates   []predicate.Class
 	withStudents *StudentQuery
+	withTeachers *TeacherQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +78,28 @@ func (cq *ClassQuery) QueryStudents() *StudentQuery {
 			sqlgraph.From(class.Table, class.FieldID, selector),
 			sqlgraph.To(student.Table, student.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, class.StudentsTable, class.StudentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTeachers chains the current query on the "teachers" edge.
+func (cq *ClassQuery) QueryTeachers() *TeacherQuery {
+	query := (&TeacherClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(class.Table, class.FieldID, selector),
+			sqlgraph.To(teacher.Table, teacher.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, class.TeachersTable, class.TeachersColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -276,6 +300,7 @@ func (cq *ClassQuery) Clone() *ClassQuery {
 		inters:       append([]Interceptor{}, cq.inters...),
 		predicates:   append([]predicate.Class{}, cq.predicates...),
 		withStudents: cq.withStudents.Clone(),
+		withTeachers: cq.withTeachers.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -290,6 +315,17 @@ func (cq *ClassQuery) WithStudents(opts ...func(*StudentQuery)) *ClassQuery {
 		opt(query)
 	}
 	cq.withStudents = query
+	return cq
+}
+
+// WithTeachers tells the query-builder to eager-load the nodes that are connected to
+// the "teachers" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ClassQuery) WithTeachers(opts ...func(*TeacherQuery)) *ClassQuery {
+	query := (&TeacherClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withTeachers = query
 	return cq
 }
 
@@ -371,8 +407,9 @@ func (cq *ClassQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Class,
 	var (
 		nodes       = []*Class{}
 		_spec       = cq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			cq.withStudents != nil,
+			cq.withTeachers != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -400,6 +437,13 @@ func (cq *ClassQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Class,
 			return nil, err
 		}
 	}
+	if query := cq.withTeachers; query != nil {
+		if err := cq.loadTeachers(ctx, query, nodes,
+			func(n *Class) { n.Edges.Teachers = []*Teacher{} },
+			func(n *Class, e *Teacher) { n.Edges.Teachers = append(n.Edges.Teachers, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -418,6 +462,36 @@ func (cq *ClassQuery) loadStudents(ctx context.Context, query *StudentQuery, nod
 	}
 	query.Where(predicate.Student(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(class.StudentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ClassID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "class_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (cq *ClassQuery) loadTeachers(ctx context.Context, query *TeacherQuery, nodes []*Class, init func(*Class), assign func(*Class, *Teacher)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Class)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(teacher.FieldClassID)
+	}
+	query.Where(predicate.Teacher(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(class.TeachersColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

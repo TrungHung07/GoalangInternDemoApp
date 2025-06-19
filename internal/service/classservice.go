@@ -9,9 +9,11 @@ import (
 	pb "DemoApp/api/helloworld/v1"
 	ent "DemoApp/ent"
 	class "DemoApp/ent/class"
+	"DemoApp/ent/teacher"
 	"DemoApp/internal/data"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/jinzhu/copier"
 	// "DemoApp/internal/biz"
 )
 
@@ -38,6 +40,50 @@ func (s *ClassServiceService) setCache(ctx context.Context, key string, value []
 
 func (s *ClassServiceService) getCache(ctx context.Context, key string) ([]byte, error) {
 	return s.s.Redis.Get(ctx, key).Bytes()
+}
+
+func (s *ClassServiceService) saveClassToCache(ctx context.Context, key string, reply *pb.GetClassReply, id int64) {
+	if data, err := json.Marshal(reply); err == nil {
+		if cacheErr := s.setCache(ctx, key, data); cacheErr != nil {
+			s.log.Warnf("Failed to set cache for class ID %d: %v", id, cacheErr)
+		}
+	}
+}
+
+func (s *ClassServiceService) saveClassListToCache(ctx context.Context, key string, reply *pb.ListClassReply) {
+	if data, err := json.Marshal(reply); err == nil {
+		_ = s.setCache(ctx, key, data)
+	}
+}
+
+func (s *ClassServiceService) buildCacheKey(id int64) string {
+	return fmt.Sprintf("class:%d", id)
+}
+
+func (s *ClassServiceService) getClassListFromCache(ctx context.Context, key string) *pb.ListClassReply {
+	val, err := s.getCache(ctx, key)
+	if err == nil && len(val) > 0 {
+		log.Infof("Cache hit")
+		reply := &pb.ListClassReply{}
+		if e := json.Unmarshal(val, reply); e == nil {
+			return reply
+		}
+	}
+	return nil
+}
+
+func (s *ClassServiceService) getClassFromCache(ctx context.Context, key string) (*pb.GetClassReply, bool) {
+	val, err := s.getCache(ctx, key)
+	if err != nil || len(val) == 0 {
+		return nil, false
+	}
+
+	var reply pb.GetClassReply
+	if err := json.Unmarshal(val, &reply); err != nil {
+		s.log.Warnf("Failed to unmarshal cached class: %v", err)
+		return nil, false
+	}
+	return &reply, true
 }
 
 func (s *ClassServiceService) invalidateClassListCache(ctx context.Context) {
@@ -135,67 +181,49 @@ func applyPagination(query *ent.ClassQuery, page, pageSize int) *ent.ClassQuery 
 }
 
 func applyClassFilters(query *ent.ClassQuery, req *pb.ListClassRequest) *ent.ClassQuery {
-	if req.Name != nil {
-		query = query.Where(class.NameContains(*req.Name))
+	filter := req.Filter
+	if filter.Name != nil {
+		query = query.Where(class.NameContains(*filter.Name))
 	}
-	if req.Grade != nil {
-		query = query.Where(class.GradeEQ(*req.Grade))
+	if filter.IsDeleted != nil {
+		query = query.Where(class.IsDeletedEQ(*filter.IsDeleted))
 	}
-	if req.IsDeleted != nil {
-		query = query.Where(class.IsDeletedEQ(*req.IsDeleted))
-	}
-	if req.Keyword != nil {
+	if filter.Keyword != nil {
 		query = query.Where(
-			class.NameContains(*req.Keyword),
+			class.NameContains(*filter.Keyword),
 		)
 	}
+	if filter.MinClassTeacher != nil {
+		query = query.Where(class.HasTeachersWith(
+			teacher.AgeGT(int(*filter.MinClassTeacher)),
+		))
+	}
+	// if filter.MaxClassStudentQuantity != nil {
+	// 	query = query.Where(
+	// }
 	return query
 }
 
 func (s *ClassServiceService) ListClass(ctx context.Context, req *pb.ListClassRequest) (*pb.ListClassReply, error) {
-
-	cacheKey := fmt.Sprintf("class:list:%v:%v:%v:%v:%v", req.Name, req.Grade, req.IsDeleted, req.Page, req.PageSize)
-	val, err := s.getCache(ctx, cacheKey)
-	if err == nil && len(val) > 0 {
-		log.Infof("Cache hit")
-		reply := &pb.ListClassReply{}
-		if e := json.Unmarshal(val, reply); e == nil {
-			return reply, nil
-		}
-	}
-
+	cacheKey := fmt.Sprintf("class:list:%v:%v:%v", req.Filter, req.Page, req.PageSize)
+	_ = s.getClassListFromCache(ctx, cacheKey)
 	query := s.s.DB.Class.Query()
 	query = applyClassFilters(query, req)
-	total, err := query.Clone().Count(ctx)
-	if err != nil {
-		s.log.Infof("Failed to count classes:", err)
-		return nil, err
+	total, e := query.Clone().Count(ctx)
+	if e != nil {
+		return nil, e
 	}
 	query = applyPagination(query, int(req.Page), int(req.PageSize))
-	classes, err := query.All(ctx)
-	if err != nil {
-		s.log.Infof("Failed to list classes:", err)
-		return nil, err
+	classes, e := query.All(ctx)
+	if e != nil {
+		return nil, e
 	}
-	var items []*pb.ClassData
-	for _, class := range classes {
-		item := &pb.ClassData{
-			Id:        int64(class.ID),
-			Name:      class.Name,
-			Grade:     class.Grade,
-			IsDeleted: &class.IsDeleted,
-		}
-		items = append(items, item)
-	}
+	dtoList := s.toDTOList(classes)
 	reply := &pb.ListClassReply{
-		Items: items,
+		Items: dtoList,
 		Total: int64(total), // hoặc query tổng nếu dùng pagination
 	}
-
-	if data, e := json.Marshal(reply); e == nil {
-		_ = s.setCache(ctx, cacheKey, data)
-	}
-
+	s.saveClassListToCache(ctx, cacheKey, reply)
 	return reply, nil
 }
 
@@ -209,53 +237,68 @@ func (s *ClassServiceService) ListClass(ctx context.Context, req *pb.ListClassRe
 // redis :
 // key : string
 // value : string,set,.... JSON
+
 func (s *ClassServiceService) GetClass(ctx context.Context, req *pb.GetClassRequest) (*pb.GetClassReply, error) {
-	cacheKey := fmt.Sprintf("class:%d", req.Id) // lấy key
-	// Thử lấy cache từ Redis -> value
-	val, err := s.getCache(ctx, cacheKey)
-
-	if err == nil && len(val) > 0 {
-		log.Infof("Cache hit for class ID: %d", req.Id)
-		reply := &pb.GetClassReply{}
-		//Unmarshal : chuyển đổi dữ liệu từ JSON về struct
-		if unmarshalErr := json.Unmarshal(val, reply); unmarshalErr == nil {
-			return reply, nil
-		}
-		// s.log.Warnf("Failed to unmarshal cached class: %v", unmarshalErr)
+	cacheKey := s.buildCacheKey(req.Id) // lấy key
+	if reply, ok := s.getClassFromCache(ctx, cacheKey); ok {
+		s.log.Infof("Cache hit for class ID %d", req.Id)
+		return reply, nil
 	}
-
 	query := s.s.DB.Class.Query().Where(class.IDEQ(int(req.Id)))
-	class, err := query.WithStudents().Only(ctx)
+	class, err := query.WithStudents().WithTeachers().Only(ctx)
 	if err != nil {
 		s.log.Infof("Failed to get class:", err)
 		return nil, err
 	}
-	var students []*pb.StudentDataForClass
-	for _, student := range class.Edges.Students {
-		students = append(students, &pb.StudentDataForClass{
-			Id:   int64(student.ID),
-			Name: student.Name,
-		})
-	}
-	s.log.Infof("\nGet class with students: %v\n", students)
-	// Convert class to pb.ClassData
+	reply := s.toDTO(class)
+	s.saveClassToCache(ctx, cacheKey, reply, req.Id)
+	return reply, nil
+}
+
+func (s *ClassServiceService) toDTO(entity *ent.Class) *pb.GetClassReply {
+	var classDTO pb.ClassData
+	_ = copier.Copy(&classDTO, entity)
+	studentsDTOList := s.mapStudents(entity.Edges.Students)
+	teachersDTOList := s.mapTeachers(entity.Edges.Teachers)
 	reply := &pb.GetClassReply{
-		Class: &pb.ClassData{
+		Class:            &classDTO,
+		Students:         studentsDTOList,
+		Teachers:         teachersDTOList,
+		StudentsQuantity: int32(len(studentsDTOList)),
+		TeachersQuantity: int32(len(teachersDTOList)),
+	}
+	return reply
+}
+
+func (s *ClassServiceService) toDTOList(classes []*ent.Class) []*pb.ClassData {
+	var items []*pb.ClassData
+	for _, class := range classes {
+		items = append(items, &pb.ClassData{
 			Id:        int64(class.ID),
 			Name:      class.Name,
 			Grade:     class.Grade,
 			IsDeleted: &class.IsDeleted,
-		},
-		Students: students,
+		})
 	}
+	return items
+}
 
-	//Lưu vào cache
-	//Marshal : chuyển đổi dữ liệu từ struct về JSON để lưu vào Redis cache : value
-	if data, e := json.Marshal(reply); e == nil {
-		if cacheErr := s.setCache(ctx, cacheKey, data); cacheErr != nil {
-			s.log.Warnf("Failed to set cache for class ID %d: %v", req.Id, cacheErr)
-		}
+func (s *ClassServiceService) mapTeachers(teachers []*ent.Teacher) []*pb.TeacherDataForClass {
+	var result []*pb.TeacherDataForClass
+	for _, t := range teachers {
+		result = append(result, &pb.TeacherDataForClass{
+			Name: t.Name,
+		})
 	}
+	return result
+}
 
-	return reply, nil
+func (s *ClassServiceService) mapStudents(students []*ent.Student) []*pb.StudentDataForClass {
+	var result []*pb.StudentDataForClass
+	for _, t := range students {
+		result = append(result, &pb.StudentDataForClass{
+			Name: t.Name,
+		})
+	}
+	return result
 }

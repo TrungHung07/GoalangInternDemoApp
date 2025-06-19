@@ -31,7 +31,7 @@ func (s *TeacherServiceService) CreateTeacher(ctx context.Context, req *pb.Creat
 	teacher, err := s.data.DB.Teacher.Create().
 		SetName(req.Name).
 		SetEmail(req.Email).
-		SetGrade(int(req.Grade)).
+		SetClassID(int(req.ClassId)).
 		Save(ctx)
 	if err != nil {
 		s.log.Error("Failed to create teacher:", err)
@@ -55,9 +55,6 @@ func (s *TeacherServiceService) UpdateTeacher(ctx context.Context, req *pb.Updat
 	}
 	if req.Email != "" {
 		update.SetEmail(req.Email)
-	}
-	if req.Grade != 0 {
-		update.SetGrade(int(req.Grade))
 	}
 	teacherUpdateed, err := update.Save(ctx)
 
@@ -95,10 +92,10 @@ func (s *TeacherServiceService) ListTeachers(ctx context.Context, req *pb.ListTe
 	var teacherReplies []*pb.TeacherReply
 	for _, teacher := range teachers {
 		teacherReplies = append(teacherReplies, &pb.TeacherReply{
-			Id:    int64(teacher.ID),
-			Name:  teacher.Name,
-			Email: teacher.Email,
-			Grade: int32(teacher.Grade),
+			Id:        int64(teacher.ID),
+			Name:      teacher.Name,
+			Email:     teacher.Email,
+			ClassName: teacher.Edges.Classes.Name,
 		})
 	}
 	return &pb.ListTeachersReply{Teachers: teacherReplies}, nil

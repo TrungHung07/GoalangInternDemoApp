@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"DemoApp/ent/class"
 	"DemoApp/ent/predicate"
 	"DemoApp/ent/teacher"
 	"context"
@@ -55,30 +56,75 @@ func (tu *TeacherUpdate) SetNillableEmail(s *string) *TeacherUpdate {
 	return tu
 }
 
-// SetGrade sets the "grade" field.
-func (tu *TeacherUpdate) SetGrade(i int) *TeacherUpdate {
-	tu.mutation.ResetGrade()
-	tu.mutation.SetGrade(i)
+// SetClassID sets the "class_id" field.
+func (tu *TeacherUpdate) SetClassID(i int) *TeacherUpdate {
+	tu.mutation.SetClassID(i)
 	return tu
 }
 
-// SetNillableGrade sets the "grade" field if the given value is not nil.
-func (tu *TeacherUpdate) SetNillableGrade(i *int) *TeacherUpdate {
+// SetNillableClassID sets the "class_id" field if the given value is not nil.
+func (tu *TeacherUpdate) SetNillableClassID(i *int) *TeacherUpdate {
 	if i != nil {
-		tu.SetGrade(*i)
+		tu.SetClassID(*i)
 	}
 	return tu
 }
 
-// AddGrade adds i to the "grade" field.
-func (tu *TeacherUpdate) AddGrade(i int) *TeacherUpdate {
-	tu.mutation.AddGrade(i)
+// SetAge sets the "age" field.
+func (tu *TeacherUpdate) SetAge(i int) *TeacherUpdate {
+	tu.mutation.ResetAge()
+	tu.mutation.SetAge(i)
 	return tu
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (tu *TeacherUpdate) SetNillableAge(i *int) *TeacherUpdate {
+	if i != nil {
+		tu.SetAge(*i)
+	}
+	return tu
+}
+
+// AddAge adds i to the "age" field.
+func (tu *TeacherUpdate) AddAge(i int) *TeacherUpdate {
+	tu.mutation.AddAge(i)
+	return tu
+}
+
+// SetIsDeleted sets the "is_deleted" field.
+func (tu *TeacherUpdate) SetIsDeleted(b bool) *TeacherUpdate {
+	tu.mutation.SetIsDeleted(b)
+	return tu
+}
+
+// SetNillableIsDeleted sets the "is_deleted" field if the given value is not nil.
+func (tu *TeacherUpdate) SetNillableIsDeleted(b *bool) *TeacherUpdate {
+	if b != nil {
+		tu.SetIsDeleted(*b)
+	}
+	return tu
+}
+
+// SetClassesID sets the "classes" edge to the Class entity by ID.
+func (tu *TeacherUpdate) SetClassesID(id int) *TeacherUpdate {
+	tu.mutation.SetClassesID(id)
+	return tu
+}
+
+// SetClasses sets the "classes" edge to the Class entity.
+func (tu *TeacherUpdate) SetClasses(c *Class) *TeacherUpdate {
+	return tu.SetClassesID(c.ID)
 }
 
 // Mutation returns the TeacherMutation object of the builder.
 func (tu *TeacherUpdate) Mutation() *TeacherMutation {
 	return tu.mutation
+}
+
+// ClearClasses clears the "classes" edge to the Class entity.
+func (tu *TeacherUpdate) ClearClasses() *TeacherUpdate {
+	tu.mutation.ClearClasses()
+	return tu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -108,7 +154,23 @@ func (tu *TeacherUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (tu *TeacherUpdate) check() error {
+	if v, ok := tu.mutation.Age(); ok {
+		if err := teacher.AgeValidator(v); err != nil {
+			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "Teacher.age": %w`, err)}
+		}
+	}
+	if tu.mutation.ClassesCleared() && len(tu.mutation.ClassesIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Teacher.classes"`)
+	}
+	return nil
+}
+
 func (tu *TeacherUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := tu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(teacher.Table, teacher.Columns, sqlgraph.NewFieldSpec(teacher.FieldID, field.TypeInt))
 	if ps := tu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -123,11 +185,43 @@ func (tu *TeacherUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tu.mutation.Email(); ok {
 		_spec.SetField(teacher.FieldEmail, field.TypeString, value)
 	}
-	if value, ok := tu.mutation.Grade(); ok {
-		_spec.SetField(teacher.FieldGrade, field.TypeInt, value)
+	if value, ok := tu.mutation.Age(); ok {
+		_spec.SetField(teacher.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := tu.mutation.AddedGrade(); ok {
-		_spec.AddField(teacher.FieldGrade, field.TypeInt, value)
+	if value, ok := tu.mutation.AddedAge(); ok {
+		_spec.AddField(teacher.FieldAge, field.TypeInt, value)
+	}
+	if value, ok := tu.mutation.IsDeleted(); ok {
+		_spec.SetField(teacher.FieldIsDeleted, field.TypeBool, value)
+	}
+	if tu.mutation.ClassesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   teacher.ClassesTable,
+			Columns: []string{teacher.ClassesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(class.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.ClassesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   teacher.ClassesTable,
+			Columns: []string{teacher.ClassesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(class.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -177,30 +271,75 @@ func (tuo *TeacherUpdateOne) SetNillableEmail(s *string) *TeacherUpdateOne {
 	return tuo
 }
 
-// SetGrade sets the "grade" field.
-func (tuo *TeacherUpdateOne) SetGrade(i int) *TeacherUpdateOne {
-	tuo.mutation.ResetGrade()
-	tuo.mutation.SetGrade(i)
+// SetClassID sets the "class_id" field.
+func (tuo *TeacherUpdateOne) SetClassID(i int) *TeacherUpdateOne {
+	tuo.mutation.SetClassID(i)
 	return tuo
 }
 
-// SetNillableGrade sets the "grade" field if the given value is not nil.
-func (tuo *TeacherUpdateOne) SetNillableGrade(i *int) *TeacherUpdateOne {
+// SetNillableClassID sets the "class_id" field if the given value is not nil.
+func (tuo *TeacherUpdateOne) SetNillableClassID(i *int) *TeacherUpdateOne {
 	if i != nil {
-		tuo.SetGrade(*i)
+		tuo.SetClassID(*i)
 	}
 	return tuo
 }
 
-// AddGrade adds i to the "grade" field.
-func (tuo *TeacherUpdateOne) AddGrade(i int) *TeacherUpdateOne {
-	tuo.mutation.AddGrade(i)
+// SetAge sets the "age" field.
+func (tuo *TeacherUpdateOne) SetAge(i int) *TeacherUpdateOne {
+	tuo.mutation.ResetAge()
+	tuo.mutation.SetAge(i)
 	return tuo
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (tuo *TeacherUpdateOne) SetNillableAge(i *int) *TeacherUpdateOne {
+	if i != nil {
+		tuo.SetAge(*i)
+	}
+	return tuo
+}
+
+// AddAge adds i to the "age" field.
+func (tuo *TeacherUpdateOne) AddAge(i int) *TeacherUpdateOne {
+	tuo.mutation.AddAge(i)
+	return tuo
+}
+
+// SetIsDeleted sets the "is_deleted" field.
+func (tuo *TeacherUpdateOne) SetIsDeleted(b bool) *TeacherUpdateOne {
+	tuo.mutation.SetIsDeleted(b)
+	return tuo
+}
+
+// SetNillableIsDeleted sets the "is_deleted" field if the given value is not nil.
+func (tuo *TeacherUpdateOne) SetNillableIsDeleted(b *bool) *TeacherUpdateOne {
+	if b != nil {
+		tuo.SetIsDeleted(*b)
+	}
+	return tuo
+}
+
+// SetClassesID sets the "classes" edge to the Class entity by ID.
+func (tuo *TeacherUpdateOne) SetClassesID(id int) *TeacherUpdateOne {
+	tuo.mutation.SetClassesID(id)
+	return tuo
+}
+
+// SetClasses sets the "classes" edge to the Class entity.
+func (tuo *TeacherUpdateOne) SetClasses(c *Class) *TeacherUpdateOne {
+	return tuo.SetClassesID(c.ID)
 }
 
 // Mutation returns the TeacherMutation object of the builder.
 func (tuo *TeacherUpdateOne) Mutation() *TeacherMutation {
 	return tuo.mutation
+}
+
+// ClearClasses clears the "classes" edge to the Class entity.
+func (tuo *TeacherUpdateOne) ClearClasses() *TeacherUpdateOne {
+	tuo.mutation.ClearClasses()
+	return tuo
 }
 
 // Where appends a list predicates to the TeacherUpdate builder.
@@ -243,7 +382,23 @@ func (tuo *TeacherUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (tuo *TeacherUpdateOne) check() error {
+	if v, ok := tuo.mutation.Age(); ok {
+		if err := teacher.AgeValidator(v); err != nil {
+			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "Teacher.age": %w`, err)}
+		}
+	}
+	if tuo.mutation.ClassesCleared() && len(tuo.mutation.ClassesIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Teacher.classes"`)
+	}
+	return nil
+}
+
 func (tuo *TeacherUpdateOne) sqlSave(ctx context.Context) (_node *Teacher, err error) {
+	if err := tuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(teacher.Table, teacher.Columns, sqlgraph.NewFieldSpec(teacher.FieldID, field.TypeInt))
 	id, ok := tuo.mutation.ID()
 	if !ok {
@@ -275,11 +430,43 @@ func (tuo *TeacherUpdateOne) sqlSave(ctx context.Context) (_node *Teacher, err e
 	if value, ok := tuo.mutation.Email(); ok {
 		_spec.SetField(teacher.FieldEmail, field.TypeString, value)
 	}
-	if value, ok := tuo.mutation.Grade(); ok {
-		_spec.SetField(teacher.FieldGrade, field.TypeInt, value)
+	if value, ok := tuo.mutation.Age(); ok {
+		_spec.SetField(teacher.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := tuo.mutation.AddedGrade(); ok {
-		_spec.AddField(teacher.FieldGrade, field.TypeInt, value)
+	if value, ok := tuo.mutation.AddedAge(); ok {
+		_spec.AddField(teacher.FieldAge, field.TypeInt, value)
+	}
+	if value, ok := tuo.mutation.IsDeleted(); ok {
+		_spec.SetField(teacher.FieldIsDeleted, field.TypeBool, value)
+	}
+	if tuo.mutation.ClassesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   teacher.ClassesTable,
+			Columns: []string{teacher.ClassesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(class.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.ClassesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   teacher.ClassesTable,
+			Columns: []string{teacher.ClassesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(class.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Teacher{config: tuo.config}
 	_spec.Assign = _node.assignValues

@@ -16,7 +16,6 @@ require (
 
 require (
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/segmentio/kafka-go v0.4.48
 	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb
 )
 
@@ -57,9 +56,10 @@ require (
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/go-playground/form/v4 v4.2.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
+	github.com/jinzhu/copier v0.4.0
 	github.com/lib/pq v1.10.9
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect

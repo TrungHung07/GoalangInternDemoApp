@@ -21,11 +21,17 @@ message DeleteClassRequest {
 message ListClassRequest {
     uint32 page = 1; // Số trang
     uint32 page_size = 2; // Số lượng bản ghi trên mỗi trang
+    ClassFilterRequest filter =3 ; 
+}
+
+message ClassFilterRequest {
     optional string name = 3; // Tên lớp học để lọc
-    optional int64 grade = 4; // Lớp học để lọc
     optional bool is_deleted = 5; // Lọc theo trạng thái xóa
     optional string keyword = 6; // Từ khóa tìm kiếm
+    optional int32 minClassTeacher = 7;
+    optional int32 maxClassStudentQuantity = 8;
 }
+
 
 message GetClassRequest {
     int64 id = 1; // ID của lớp học cần lấy thông tin
@@ -37,13 +43,21 @@ message ListClassReply {
 }
 
 message StudentDataForClass {
-    int64 id = 1;
     string name = 2;
 }
+
+message TeacherDataForClass {
+    string name = 1;
+}
+
+
 
 message GetClassReply {
     ClassData class = 1; // Thông tin lớp học
     repeated StudentDataForClass students = 2; // Danh sách học sinh trong lớp
+    repeated TeacherDataForClass teachers =3;
+    int32 students_quantity = 4; 
+    int32 teachers_quantity = 5; 
 }
 
 

@@ -6,6 +6,7 @@ import (
 	"DemoApp/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -63,9 +64,19 @@ func Email(v string) predicate.Teacher {
 	return predicate.Teacher(sql.FieldEQ(FieldEmail, v))
 }
 
-// Grade applies equality check predicate on the "grade" field. It's identical to GradeEQ.
-func Grade(v int) predicate.Teacher {
-	return predicate.Teacher(sql.FieldEQ(FieldGrade, v))
+// ClassID applies equality check predicate on the "class_id" field. It's identical to ClassIDEQ.
+func ClassID(v int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldEQ(FieldClassID, v))
+}
+
+// Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
+func Age(v int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldEQ(FieldAge, v))
+}
+
+// IsDeleted applies equality check predicate on the "is_deleted" field. It's identical to IsDeletedEQ.
+func IsDeleted(v bool) predicate.Teacher {
+	return predicate.Teacher(sql.FieldEQ(FieldIsDeleted, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
@@ -198,44 +209,97 @@ func EmailContainsFold(v string) predicate.Teacher {
 	return predicate.Teacher(sql.FieldContainsFold(FieldEmail, v))
 }
 
-// GradeEQ applies the EQ predicate on the "grade" field.
-func GradeEQ(v int) predicate.Teacher {
-	return predicate.Teacher(sql.FieldEQ(FieldGrade, v))
+// ClassIDEQ applies the EQ predicate on the "class_id" field.
+func ClassIDEQ(v int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldEQ(FieldClassID, v))
 }
 
-// GradeNEQ applies the NEQ predicate on the "grade" field.
-func GradeNEQ(v int) predicate.Teacher {
-	return predicate.Teacher(sql.FieldNEQ(FieldGrade, v))
+// ClassIDNEQ applies the NEQ predicate on the "class_id" field.
+func ClassIDNEQ(v int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldNEQ(FieldClassID, v))
 }
 
-// GradeIn applies the In predicate on the "grade" field.
-func GradeIn(vs ...int) predicate.Teacher {
-	return predicate.Teacher(sql.FieldIn(FieldGrade, vs...))
+// ClassIDIn applies the In predicate on the "class_id" field.
+func ClassIDIn(vs ...int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldIn(FieldClassID, vs...))
 }
 
-// GradeNotIn applies the NotIn predicate on the "grade" field.
-func GradeNotIn(vs ...int) predicate.Teacher {
-	return predicate.Teacher(sql.FieldNotIn(FieldGrade, vs...))
+// ClassIDNotIn applies the NotIn predicate on the "class_id" field.
+func ClassIDNotIn(vs ...int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldNotIn(FieldClassID, vs...))
 }
 
-// GradeGT applies the GT predicate on the "grade" field.
-func GradeGT(v int) predicate.Teacher {
-	return predicate.Teacher(sql.FieldGT(FieldGrade, v))
+// AgeEQ applies the EQ predicate on the "age" field.
+func AgeEQ(v int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldEQ(FieldAge, v))
 }
 
-// GradeGTE applies the GTE predicate on the "grade" field.
-func GradeGTE(v int) predicate.Teacher {
-	return predicate.Teacher(sql.FieldGTE(FieldGrade, v))
+// AgeNEQ applies the NEQ predicate on the "age" field.
+func AgeNEQ(v int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldNEQ(FieldAge, v))
 }
 
-// GradeLT applies the LT predicate on the "grade" field.
-func GradeLT(v int) predicate.Teacher {
-	return predicate.Teacher(sql.FieldLT(FieldGrade, v))
+// AgeIn applies the In predicate on the "age" field.
+func AgeIn(vs ...int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldIn(FieldAge, vs...))
 }
 
-// GradeLTE applies the LTE predicate on the "grade" field.
-func GradeLTE(v int) predicate.Teacher {
-	return predicate.Teacher(sql.FieldLTE(FieldGrade, v))
+// AgeNotIn applies the NotIn predicate on the "age" field.
+func AgeNotIn(vs ...int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldNotIn(FieldAge, vs...))
+}
+
+// AgeGT applies the GT predicate on the "age" field.
+func AgeGT(v int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldGT(FieldAge, v))
+}
+
+// AgeGTE applies the GTE predicate on the "age" field.
+func AgeGTE(v int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldGTE(FieldAge, v))
+}
+
+// AgeLT applies the LT predicate on the "age" field.
+func AgeLT(v int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldLT(FieldAge, v))
+}
+
+// AgeLTE applies the LTE predicate on the "age" field.
+func AgeLTE(v int) predicate.Teacher {
+	return predicate.Teacher(sql.FieldLTE(FieldAge, v))
+}
+
+// IsDeletedEQ applies the EQ predicate on the "is_deleted" field.
+func IsDeletedEQ(v bool) predicate.Teacher {
+	return predicate.Teacher(sql.FieldEQ(FieldIsDeleted, v))
+}
+
+// IsDeletedNEQ applies the NEQ predicate on the "is_deleted" field.
+func IsDeletedNEQ(v bool) predicate.Teacher {
+	return predicate.Teacher(sql.FieldNEQ(FieldIsDeleted, v))
+}
+
+// HasClasses applies the HasEdge predicate on the "classes" edge.
+func HasClasses() predicate.Teacher {
+	return predicate.Teacher(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, ClassesTable, ClassesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasClassesWith applies the HasEdge predicate on the "classes" edge with a given conditions (other predicates).
+func HasClassesWith(preds ...predicate.Class) predicate.Teacher {
+	return predicate.Teacher(func(s *sql.Selector) {
+		step := newClassesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

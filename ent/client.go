@@ -362,6 +362,22 @@ func (c *ClassClient) QueryStudents(cl *Class) *StudentQuery {
 	return query
 }
 
+// QueryTeachers queries the teachers edge of a Class.
+func (c *ClassClient) QueryTeachers(cl *Class) *TeacherQuery {
+	query := (&TeacherClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(class.Table, class.FieldID, id),
+			sqlgraph.To(teacher.Table, teacher.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, class.TeachersTable, class.TeachersColumn),
+		)
+		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ClassClient) Hooks() []Hook {
 	return c.hooks.Class
@@ -775,6 +791,22 @@ func (c *TeacherClient) GetX(ctx context.Context, id int) *Teacher {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryClasses queries the classes edge of a Teacher.
+func (c *TeacherClient) QueryClasses(t *Teacher) *ClassQuery {
+	query := (&ClassClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(teacher.Table, teacher.FieldID, id),
+			sqlgraph.To(class.Table, class.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, teacher.ClassesTable, teacher.ClassesColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

@@ -26,5 +26,8 @@ func (Class) TableName() string {
 }
 
 func (Class) Edges() []ent.Edge {
-	return []ent.Edge{edge.From("students", Student.Type).Ref("classes")}
+	return []ent.Edge{
+		edge.From("students", Student.Type).Ref("classes"),
+		edge.From("teachers", Teacher.Type).Ref("classes"),
+	}
 }

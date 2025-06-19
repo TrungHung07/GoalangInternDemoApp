@@ -72,7 +72,7 @@ type TeacherReply struct {
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Grade         int32                  `protobuf:"varint,4,opt,name=grade,proto3" json:"grade,omitempty"`
+	ClassName     string                 `protobuf:"bytes,4,opt,name=class_name,json=className,proto3" json:"class_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -128,11 +128,11 @@ func (x *TeacherReply) GetEmail() string {
 	return ""
 }
 
-func (x *TeacherReply) GetGrade() int32 {
+func (x *TeacherReply) GetClassName() string {
 	if x != nil {
-		return x.Grade
+		return x.ClassName
 	}
-	return 0
+	return ""
 }
 
 // Request để tạo mới giáo viên
@@ -140,7 +140,7 @@ type CreateTeacherRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	Grade         int32                  `protobuf:"varint,3,opt,name=grade,proto3" json:"grade,omitempty"`
+	ClassId       int32                  `protobuf:"varint,3,opt,name=class_id,json=classId,proto3" json:"class_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -189,9 +189,9 @@ func (x *CreateTeacherRequest) GetEmail() string {
 	return ""
 }
 
-func (x *CreateTeacherRequest) GetGrade() int32 {
+func (x *CreateTeacherRequest) GetClassId() int32 {
 	if x != nil {
-		return x.Grade
+		return x.ClassId
 	}
 	return 0
 }
@@ -529,16 +529,17 @@ const file_api_helloworld_v1_teacher_proto_rawDesc = "" +
 	"\n" +
 	"\x1fapi/helloworld/v1/teacher.proto\x12\rhelloworld.v1\"#\n" +
 	"\x11GetTeacherRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"^\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"g\n" +
 	"\fTeacherReply\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\x12\x14\n" +
-	"\x05grade\x18\x04 \x01(\x05R\x05grade\"V\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12\x1d\n" +
+	"\n" +
+	"class_name\x18\x04 \x01(\tR\tclassName\"[\n" +
 	"\x14CreateTeacherRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\x12\x14\n" +
-	"\x05grade\x18\x03 \x01(\x05R\x05grade\"f\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x19\n" +
+	"\bclass_id\x18\x03 \x01(\x05R\aclassId\"f\n" +
 	"\x14UpdateTeacherRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +

@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"DemoApp/ent/class"
 	"DemoApp/ent/teacher"
 	"context"
 	"errors"
@@ -31,10 +32,41 @@ func (tc *TeacherCreate) SetEmail(s string) *TeacherCreate {
 	return tc
 }
 
-// SetGrade sets the "grade" field.
-func (tc *TeacherCreate) SetGrade(i int) *TeacherCreate {
-	tc.mutation.SetGrade(i)
+// SetClassID sets the "class_id" field.
+func (tc *TeacherCreate) SetClassID(i int) *TeacherCreate {
+	tc.mutation.SetClassID(i)
 	return tc
+}
+
+// SetAge sets the "age" field.
+func (tc *TeacherCreate) SetAge(i int) *TeacherCreate {
+	tc.mutation.SetAge(i)
+	return tc
+}
+
+// SetIsDeleted sets the "is_deleted" field.
+func (tc *TeacherCreate) SetIsDeleted(b bool) *TeacherCreate {
+	tc.mutation.SetIsDeleted(b)
+	return tc
+}
+
+// SetNillableIsDeleted sets the "is_deleted" field if the given value is not nil.
+func (tc *TeacherCreate) SetNillableIsDeleted(b *bool) *TeacherCreate {
+	if b != nil {
+		tc.SetIsDeleted(*b)
+	}
+	return tc
+}
+
+// SetClassesID sets the "classes" edge to the Class entity by ID.
+func (tc *TeacherCreate) SetClassesID(id int) *TeacherCreate {
+	tc.mutation.SetClassesID(id)
+	return tc
+}
+
+// SetClasses sets the "classes" edge to the Class entity.
+func (tc *TeacherCreate) SetClasses(c *Class) *TeacherCreate {
+	return tc.SetClassesID(c.ID)
 }
 
 // Mutation returns the TeacherMutation object of the builder.
@@ -44,6 +76,7 @@ func (tc *TeacherCreate) Mutation() *TeacherMutation {
 
 // Save creates the Teacher in the database.
 func (tc *TeacherCreate) Save(ctx context.Context) (*Teacher, error) {
+	tc.defaults()
 	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
@@ -69,6 +102,14 @@ func (tc *TeacherCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tc *TeacherCreate) defaults() {
+	if _, ok := tc.mutation.IsDeleted(); !ok {
+		v := teacher.DefaultIsDeleted
+		tc.mutation.SetIsDeleted(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tc *TeacherCreate) check() error {
 	if _, ok := tc.mutation.Name(); !ok {
@@ -77,8 +118,22 @@ func (tc *TeacherCreate) check() error {
 	if _, ok := tc.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "Teacher.email"`)}
 	}
-	if _, ok := tc.mutation.Grade(); !ok {
-		return &ValidationError{Name: "grade", err: errors.New(`ent: missing required field "Teacher.grade"`)}
+	if _, ok := tc.mutation.ClassID(); !ok {
+		return &ValidationError{Name: "class_id", err: errors.New(`ent: missing required field "Teacher.class_id"`)}
+	}
+	if _, ok := tc.mutation.Age(); !ok {
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Teacher.age"`)}
+	}
+	if v, ok := tc.mutation.Age(); ok {
+		if err := teacher.AgeValidator(v); err != nil {
+			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "Teacher.age": %w`, err)}
+		}
+	}
+	if _, ok := tc.mutation.IsDeleted(); !ok {
+		return &ValidationError{Name: "is_deleted", err: errors.New(`ent: missing required field "Teacher.is_deleted"`)}
+	}
+	if len(tc.mutation.ClassesIDs()) == 0 {
+		return &ValidationError{Name: "classes", err: errors.New(`ent: missing required edge "Teacher.classes"`)}
 	}
 	return nil
 }
@@ -114,9 +169,30 @@ func (tc *TeacherCreate) createSpec() (*Teacher, *sqlgraph.CreateSpec) {
 		_spec.SetField(teacher.FieldEmail, field.TypeString, value)
 		_node.Email = value
 	}
-	if value, ok := tc.mutation.Grade(); ok {
-		_spec.SetField(teacher.FieldGrade, field.TypeInt, value)
-		_node.Grade = value
+	if value, ok := tc.mutation.Age(); ok {
+		_spec.SetField(teacher.FieldAge, field.TypeInt, value)
+		_node.Age = value
+	}
+	if value, ok := tc.mutation.IsDeleted(); ok {
+		_spec.SetField(teacher.FieldIsDeleted, field.TypeBool, value)
+		_node.IsDeleted = value
+	}
+	if nodes := tc.mutation.ClassesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   teacher.ClassesTable,
+			Columns: []string{teacher.ClassesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(class.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ClassID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -139,6 +215,7 @@ func (tcb *TeacherCreateBulk) Save(ctx context.Context) ([]*Teacher, error) {
 	for i := range tcb.builders {
 		func(i int, root context.Context) {
 			builder := tcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TeacherMutation)
 				if !ok {

@@ -87,13 +87,23 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "email", Type: field.TypeString},
-		{Name: "grade", Type: field.TypeInt},
+		{Name: "age", Type: field.TypeInt},
+		{Name: "is_deleted", Type: field.TypeBool, Default: false},
+		{Name: "class_id", Type: field.TypeInt},
 	}
 	// TeachersTable holds the schema information for the "teachers" table.
 	TeachersTable = &schema.Table{
 		Name:       "teachers",
 		Columns:    TeachersColumns,
 		PrimaryKey: []*schema.Column{TeachersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "teachers_classes_classes",
+				Columns:    []*schema.Column{TeachersColumns[5]},
+				RefColumns: []*schema.Column{ClassesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -117,4 +127,5 @@ var (
 
 func init() {
 	StudentsTable.ForeignKeys[0].RefTable = ClassesTable
+	TeachersTable.ForeignKeys[0].RefTable = ClassesTable
 }
