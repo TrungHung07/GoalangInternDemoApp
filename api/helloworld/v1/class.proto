@@ -2,7 +2,7 @@ syntax = "proto3";
 package helloworld.v1;
 option go_package = "DemoApp/api/helloworld/v1;v1";
 
-
+//kratos proto client ./api/helloworld/v1/class.proto
 message CreateClassRequest {
     string name = 1; 
     int64 grade = 2; 
@@ -21,16 +21,16 @@ message DeleteClassRequest {
 message ListClassRequest {
     uint32 page = 1; // Số trang
     uint32 page_size = 2; // Số lượng bản ghi trên mỗi trang
-    ClassFilterRequest filter =3 ; 
+    optional ClassFilterRequest filter =3 ; 
 }
 
 message ClassFilterRequest {
     optional string name = 3; // Tên lớp học để lọc
     optional bool is_deleted = 5; // Lọc theo trạng thái xóa
     optional string keyword = 6; // Từ khóa tìm kiếm
-    optional int32 minClassTeacher = 7;
-    optional int32 maxClassStudentQuantity = 8;
-}
+    optional int32 minClassTeacher = 7; // độ tuổi của giáo viên tối thiểu 
+    optional int32 maxClassStudentQuantity = 8;// sĩ số học sinh tối đa
+}   
 
 
 message GetClassRequest {

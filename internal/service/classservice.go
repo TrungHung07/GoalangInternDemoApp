@@ -12,6 +12,7 @@ import (
 	"DemoApp/ent/teacher"
 	"DemoApp/internal/data"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/jinzhu/copier"
 	// "DemoApp/internal/biz"
@@ -180,8 +181,11 @@ func applyPagination(query *ent.ClassQuery, page, pageSize int) *ent.ClassQuery 
 	return query.Offset(offset).Limit(pageSize)
 }
 
-func applyClassFilters(query *ent.ClassQuery, req *pb.ListClassRequest) *ent.ClassQuery {
+func applyClassFilters(query *ent.ClassQuery, req *pb.ListClassRequest, ctx context.Context) *ent.ClassQuery {
 	filter := req.Filter
+	if filter == nil {
+		return query
+	}
 	if filter.Name != nil {
 		query = query.Where(class.NameContains(*filter.Name))
 	}
@@ -199,20 +203,51 @@ func applyClassFilters(query *ent.ClassQuery, req *pb.ListClassRequest) *ent.Cla
 		))
 	}
 	// if filter.MaxClassStudentQuantity != nil {
-	// 	query = query.Where(
+	// 	query = query.
 	// }
+	if filter.MaxClassStudentQuantity != nil {
+		n := int(*filter.MaxClassStudentQuantity)
+
+		selectQuery := query.Clone().Select(class.FieldID).Modify(
+
+			func(s *sql.Selector) {
+				studentTable := sql.Table("students")
+				s.Join(studentTable).On(
+					s.C("id"), studentTable.C("class_id"),
+				)
+				s.GroupBy(s.C("id"))
+				s.Having(sql.LTE(sql.Count(studentTable.C("id")), n))
+			},
+		)
+		var ids []int
+		// selectQuery = selectQuery.Debug()
+		if e := selectQuery.Scan(ctx, &ids); e != nil {
+			return query
+		}
+
+		if len(ids) > 0 {
+			query = query.Where(class.IDIn(ids...))
+		} else {
+			query = query.Where(class.IDEQ(-1)) // để trả về rỗng
+		}
+	}
+
 	return query
 }
 
 func (s *ClassServiceService) ListClass(ctx context.Context, req *pb.ListClassRequest) (*pb.ListClassReply, error) {
 	cacheKey := fmt.Sprintf("class:list:%v:%v:%v", req.Filter, req.Page, req.PageSize)
-	_ = s.getClassListFromCache(ctx, cacheKey)
+	if cached := s.getClassListFromCache(ctx, cacheKey); cached != nil {
+		return cached, nil // ← return luôn nếu cache hit
+	}
+
 	query := s.s.DB.Class.Query()
-	query = applyClassFilters(query, req)
+	query = applyClassFilters(query, req, ctx)
 	total, e := query.Clone().Count(ctx)
 	if e != nil {
 		return nil, e
 	}
+
 	query = applyPagination(query, int(req.Page), int(req.PageSize))
 	classes, e := query.All(ctx)
 	if e != nil {

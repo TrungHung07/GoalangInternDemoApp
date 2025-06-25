@@ -92,6 +92,13 @@ func NewData(c *conf.Data, redisClient *redis.Client, logger log.Logger, kafkaPr
 			log.NewHelper(logger).Error(err)
 		}
 	}
+
+	ctx := context.Background()
+
+	if e := client.Schema.Create(ctx); e != nil {
+		log.Fatalf("failed to creating schema resourses :%v ", e)
+	}
+
 	return &Data{
 		DB:    client,
 		Redis: redisClient,

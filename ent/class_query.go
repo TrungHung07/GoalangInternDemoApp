@@ -27,6 +27,7 @@ type ClassQuery struct {
 	predicates   []predicate.Class
 	withStudents *StudentQuery
 	withTeachers *TeacherQuery
+	modifiers    []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -302,8 +303,9 @@ func (cq *ClassQuery) Clone() *ClassQuery {
 		withStudents: cq.withStudents.Clone(),
 		withTeachers: cq.withTeachers.Clone(),
 		// clone intermediate query.
-		sql:  cq.sql.Clone(),
-		path: cq.path,
+		sql:       cq.sql.Clone(),
+		path:      cq.path,
+		modifiers: append([]func(*sql.Selector){}, cq.modifiers...),
 	}
 }
 
@@ -421,6 +423,9 @@ func (cq *ClassQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Class,
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(cq.modifiers) > 0 {
+		_spec.Modifiers = cq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -510,6 +515,9 @@ func (cq *ClassQuery) loadTeachers(ctx context.Context, query *TeacherQuery, nod
 
 func (cq *ClassQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
+	if len(cq.modifiers) > 0 {
+		_spec.Modifiers = cq.modifiers
+	}
 	_spec.Node.Columns = cq.ctx.Fields
 	if len(cq.ctx.Fields) > 0 {
 		_spec.Unique = cq.ctx.Unique != nil && *cq.ctx.Unique
@@ -572,6 +580,9 @@ func (cq *ClassQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if cq.ctx.Unique != nil && *cq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range cq.modifiers {
+		m(selector)
+	}
 	for _, p := range cq.predicates {
 		p(selector)
 	}
@@ -587,6 +598,12 @@ func (cq *ClassQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (cq *ClassQuery) Modify(modifiers ...func(s *sql.Selector)) *ClassSelect {
+	cq.modifiers = append(cq.modifiers, modifiers...)
+	return cq.Select()
 }
 
 // ClassGroupBy is the group-by builder for Class entities.
@@ -677,4 +694,10 @@ func (cs *ClassSelect) sqlScan(ctx context.Context, root *ClassQuery, v any) err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (cs *ClassSelect) Modify(modifiers ...func(s *sql.Selector)) *ClassSelect {
+	cs.modifiers = append(cs.modifiers, modifiers...)
+	return cs
 }

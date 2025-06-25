@@ -311,6 +311,9 @@ func (x *DeleteTeacherRequest) GetId() int64 {
 // Request để lấy danh sách tất cả giáo viên
 type ListTeachersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          *int32                 `protobuf:"varint,1,opt,name=page,proto3,oneof" json:"page,omitempty"`
+	PageSize      *int32                 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3,oneof" json:"page_size,omitempty"`
+	Fitler        *FilterTeacherRequest  `protobuf:"bytes,3,opt,name=fitler,proto3,oneof" json:"fitler,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -345,6 +348,87 @@ func (*ListTeachersRequest) Descriptor() ([]byte, []int) {
 	return file_api_helloworld_v1_teacher_proto_rawDescGZIP(), []int{5}
 }
 
+func (x *ListTeachersRequest) GetPage() int32 {
+	if x != nil && x.Page != nil {
+		return *x.Page
+	}
+	return 0
+}
+
+func (x *ListTeachersRequest) GetPageSize() int32 {
+	if x != nil && x.PageSize != nil {
+		return *x.PageSize
+	}
+	return 0
+}
+
+func (x *ListTeachersRequest) GetFitler() *FilterTeacherRequest {
+	if x != nil {
+		return x.Fitler
+	}
+	return nil
+}
+
+type FilterTeacherRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MaxAge        *int32                 `protobuf:"varint,1,opt,name=maxAge,proto3,oneof" json:"maxAge,omitempty"`
+	MinAge        *int32                 `protobuf:"varint,2,opt,name=minAge,proto3,oneof" json:"minAge,omitempty"`
+	Email         *int32                 `protobuf:"varint,3,opt,name=email,proto3,oneof" json:"email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FilterTeacherRequest) Reset() {
+	*x = FilterTeacherRequest{}
+	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FilterTeacherRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FilterTeacherRequest) ProtoMessage() {}
+
+func (x *FilterTeacherRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FilterTeacherRequest.ProtoReflect.Descriptor instead.
+func (*FilterTeacherRequest) Descriptor() ([]byte, []int) {
+	return file_api_helloworld_v1_teacher_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *FilterTeacherRequest) GetMaxAge() int32 {
+	if x != nil && x.MaxAge != nil {
+		return *x.MaxAge
+	}
+	return 0
+}
+
+func (x *FilterTeacherRequest) GetMinAge() int32 {
+	if x != nil && x.MinAge != nil {
+		return *x.MinAge
+	}
+	return 0
+}
+
+func (x *FilterTeacherRequest) GetEmail() int32 {
+	if x != nil && x.Email != nil {
+		return *x.Email
+	}
+	return 0
+}
+
 // Response khi tạo xong giáo viên
 type CreateTeacherReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -355,7 +439,7 @@ type CreateTeacherReply struct {
 
 func (x *CreateTeacherReply) Reset() {
 	*x = CreateTeacherReply{}
-	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[6]
+	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -367,7 +451,7 @@ func (x *CreateTeacherReply) String() string {
 func (*CreateTeacherReply) ProtoMessage() {}
 
 func (x *CreateTeacherReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[6]
+	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -380,7 +464,7 @@ func (x *CreateTeacherReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTeacherReply.ProtoReflect.Descriptor instead.
 func (*CreateTeacherReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_teacher_proto_rawDescGZIP(), []int{6}
+	return file_api_helloworld_v1_teacher_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *CreateTeacherReply) GetMessage() string {
@@ -399,7 +483,7 @@ type DeleteTeacherReply struct {
 
 func (x *DeleteTeacherReply) Reset() {
 	*x = DeleteTeacherReply{}
-	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[7]
+	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -411,7 +495,7 @@ func (x *DeleteTeacherReply) String() string {
 func (*DeleteTeacherReply) ProtoMessage() {}
 
 func (x *DeleteTeacherReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[7]
+	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -424,7 +508,7 @@ func (x *DeleteTeacherReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTeacherReply.ProtoReflect.Descriptor instead.
 func (*DeleteTeacherReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_teacher_proto_rawDescGZIP(), []int{7}
+	return file_api_helloworld_v1_teacher_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteTeacherReply) GetMessage() string {
@@ -443,7 +527,7 @@ type UpdateTeacherReply struct {
 
 func (x *UpdateTeacherReply) Reset() {
 	*x = UpdateTeacherReply{}
-	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[8]
+	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -455,7 +539,7 @@ func (x *UpdateTeacherReply) String() string {
 func (*UpdateTeacherReply) ProtoMessage() {}
 
 func (x *UpdateTeacherReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[8]
+	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -468,7 +552,7 @@ func (x *UpdateTeacherReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTeacherReply.ProtoReflect.Descriptor instead.
 func (*UpdateTeacherReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_teacher_proto_rawDescGZIP(), []int{8}
+	return file_api_helloworld_v1_teacher_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *UpdateTeacherReply) GetMessage() string {
@@ -488,7 +572,7 @@ type ListTeachersReply struct {
 
 func (x *ListTeachersReply) Reset() {
 	*x = ListTeachersReply{}
-	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[9]
+	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -500,7 +584,7 @@ func (x *ListTeachersReply) String() string {
 func (*ListTeachersReply) ProtoMessage() {}
 
 func (x *ListTeachersReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[9]
+	mi := &file_api_helloworld_v1_teacher_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -513,7 +597,7 @@ func (x *ListTeachersReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTeachersReply.ProtoReflect.Descriptor instead.
 func (*ListTeachersReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_teacher_proto_rawDescGZIP(), []int{9}
+	return file_api_helloworld_v1_teacher_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ListTeachersReply) GetTeachers() []*TeacherReply {
@@ -546,8 +630,22 @@ const file_api_helloworld_v1_teacher_proto_rawDesc = "" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\x14\n" +
 	"\x05grade\x18\x04 \x01(\x05R\x05grade\"&\n" +
 	"\x14DeleteTeacherRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"\x15\n" +
-	"\x13ListTeachersRequest\".\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\xb4\x01\n" +
+	"\x13ListTeachersRequest\x12\x17\n" +
+	"\x04page\x18\x01 \x01(\x05H\x00R\x04page\x88\x01\x01\x12 \n" +
+	"\tpage_size\x18\x02 \x01(\x05H\x01R\bpageSize\x88\x01\x01\x12@\n" +
+	"\x06fitler\x18\x03 \x01(\v2#.helloworld.v1.FilterTeacherRequestH\x02R\x06fitler\x88\x01\x01B\a\n" +
+	"\x05_pageB\f\n" +
+	"\n" +
+	"_page_sizeB\t\n" +
+	"\a_fitler\"\x8b\x01\n" +
+	"\x14FilterTeacherRequest\x12\x1b\n" +
+	"\x06maxAge\x18\x01 \x01(\x05H\x00R\x06maxAge\x88\x01\x01\x12\x1b\n" +
+	"\x06minAge\x18\x02 \x01(\x05H\x01R\x06minAge\x88\x01\x01\x12\x19\n" +
+	"\x05email\x18\x03 \x01(\x05H\x02R\x05email\x88\x01\x01B\t\n" +
+	"\a_maxAgeB\t\n" +
+	"\a_minAgeB\b\n" +
+	"\x06_email\".\n" +
 	"\x12CreateTeacherReply\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\".\n" +
 	"\x12DeleteTeacherReply\x12\x18\n" +
@@ -576,7 +674,7 @@ func file_api_helloworld_v1_teacher_proto_rawDescGZIP() []byte {
 	return file_api_helloworld_v1_teacher_proto_rawDescData
 }
 
-var file_api_helloworld_v1_teacher_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_api_helloworld_v1_teacher_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_api_helloworld_v1_teacher_proto_goTypes = []any{
 	(*GetTeacherRequest)(nil),    // 0: helloworld.v1.GetTeacherRequest
 	(*TeacherReply)(nil),         // 1: helloworld.v1.TeacherReply
@@ -584,28 +682,30 @@ var file_api_helloworld_v1_teacher_proto_goTypes = []any{
 	(*UpdateTeacherRequest)(nil), // 3: helloworld.v1.UpdateTeacherRequest
 	(*DeleteTeacherRequest)(nil), // 4: helloworld.v1.DeleteTeacherRequest
 	(*ListTeachersRequest)(nil),  // 5: helloworld.v1.ListTeachersRequest
-	(*CreateTeacherReply)(nil),   // 6: helloworld.v1.CreateTeacherReply
-	(*DeleteTeacherReply)(nil),   // 7: helloworld.v1.DeleteTeacherReply
-	(*UpdateTeacherReply)(nil),   // 8: helloworld.v1.UpdateTeacherReply
-	(*ListTeachersReply)(nil),    // 9: helloworld.v1.ListTeachersReply
+	(*FilterTeacherRequest)(nil), // 6: helloworld.v1.FilterTeacherRequest
+	(*CreateTeacherReply)(nil),   // 7: helloworld.v1.CreateTeacherReply
+	(*DeleteTeacherReply)(nil),   // 8: helloworld.v1.DeleteTeacherReply
+	(*UpdateTeacherReply)(nil),   // 9: helloworld.v1.UpdateTeacherReply
+	(*ListTeachersReply)(nil),    // 10: helloworld.v1.ListTeachersReply
 }
 var file_api_helloworld_v1_teacher_proto_depIdxs = []int32{
-	1, // 0: helloworld.v1.ListTeachersReply.teachers:type_name -> helloworld.v1.TeacherReply
-	0, // 1: helloworld.v1.TeacherService.GetTeacher:input_type -> helloworld.v1.GetTeacherRequest
-	2, // 2: helloworld.v1.TeacherService.CreateTeacher:input_type -> helloworld.v1.CreateTeacherRequest
-	5, // 3: helloworld.v1.TeacherService.ListTeachers:input_type -> helloworld.v1.ListTeachersRequest
-	3, // 4: helloworld.v1.TeacherService.UpdateTeacher:input_type -> helloworld.v1.UpdateTeacherRequest
-	4, // 5: helloworld.v1.TeacherService.DeleteTeacher:input_type -> helloworld.v1.DeleteTeacherRequest
-	1, // 6: helloworld.v1.TeacherService.GetTeacher:output_type -> helloworld.v1.TeacherReply
-	6, // 7: helloworld.v1.TeacherService.CreateTeacher:output_type -> helloworld.v1.CreateTeacherReply
-	9, // 8: helloworld.v1.TeacherService.ListTeachers:output_type -> helloworld.v1.ListTeachersReply
-	8, // 9: helloworld.v1.TeacherService.UpdateTeacher:output_type -> helloworld.v1.UpdateTeacherReply
-	7, // 10: helloworld.v1.TeacherService.DeleteTeacher:output_type -> helloworld.v1.DeleteTeacherReply
-	6, // [6:11] is the sub-list for method output_type
-	1, // [1:6] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	6,  // 0: helloworld.v1.ListTeachersRequest.fitler:type_name -> helloworld.v1.FilterTeacherRequest
+	1,  // 1: helloworld.v1.ListTeachersReply.teachers:type_name -> helloworld.v1.TeacherReply
+	0,  // 2: helloworld.v1.TeacherService.GetTeacher:input_type -> helloworld.v1.GetTeacherRequest
+	2,  // 3: helloworld.v1.TeacherService.CreateTeacher:input_type -> helloworld.v1.CreateTeacherRequest
+	5,  // 4: helloworld.v1.TeacherService.ListTeachers:input_type -> helloworld.v1.ListTeachersRequest
+	3,  // 5: helloworld.v1.TeacherService.UpdateTeacher:input_type -> helloworld.v1.UpdateTeacherRequest
+	4,  // 6: helloworld.v1.TeacherService.DeleteTeacher:input_type -> helloworld.v1.DeleteTeacherRequest
+	1,  // 7: helloworld.v1.TeacherService.GetTeacher:output_type -> helloworld.v1.TeacherReply
+	7,  // 8: helloworld.v1.TeacherService.CreateTeacher:output_type -> helloworld.v1.CreateTeacherReply
+	10, // 9: helloworld.v1.TeacherService.ListTeachers:output_type -> helloworld.v1.ListTeachersReply
+	9,  // 10: helloworld.v1.TeacherService.UpdateTeacher:output_type -> helloworld.v1.UpdateTeacherReply
+	8,  // 11: helloworld.v1.TeacherService.DeleteTeacher:output_type -> helloworld.v1.DeleteTeacherReply
+	7,  // [7:12] is the sub-list for method output_type
+	2,  // [2:7] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_api_helloworld_v1_teacher_proto_init() }
@@ -613,13 +713,15 @@ func file_api_helloworld_v1_teacher_proto_init() {
 	if File_api_helloworld_v1_teacher_proto != nil {
 		return
 	}
+	file_api_helloworld_v1_teacher_proto_msgTypes[5].OneofWrappers = []any{}
+	file_api_helloworld_v1_teacher_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_helloworld_v1_teacher_proto_rawDesc), len(file_api_helloworld_v1_teacher_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

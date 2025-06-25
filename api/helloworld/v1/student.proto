@@ -25,6 +25,11 @@ message DeleteStudentRequest {
 message ListStudentRequest {
     uint32 page = 1; // Số trang
     uint32 page_size = 2; // Số lượng bản ghi trên mỗi trang
+    optional StudentFilterRequest filter =3;
+}
+
+
+message StudentFilterRequest {
     optional string name = 3; // Tên học sinh để lọc
     optional int64 class_id = 4; // ID lớp học để lọc
     optional bool is_deleted = 5; // Lọc theo trạng thái xóa
@@ -34,6 +39,8 @@ message ListStudentRequest {
 message GetStudentRequest {
     int64 id = 1; // ID của học sinh cần lấy thông tin
 }
+
+
 
 message ListStudentReply {
     repeated StudentData items = 1;

@@ -17,8 +17,9 @@ import (
 // HistoryUpdate is the builder for updating History entities.
 type HistoryUpdate struct {
 	config
-	hooks    []Hook
-	mutation *HistoryMutation
+	hooks     []Hook
+	mutation  *HistoryMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the HistoryUpdate builder.
@@ -157,6 +158,12 @@ func (hu *HistoryUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (hu *HistoryUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *HistoryUpdate {
+	hu.modifiers = append(hu.modifiers, modifiers...)
+	return hu
+}
+
 func (hu *HistoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(history.Table, history.Columns, sqlgraph.NewFieldSpec(history.FieldID, field.TypeString))
 	if ps := hu.mutation.predicates; len(ps) > 0 {
@@ -199,6 +206,7 @@ func (hu *HistoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if hu.mutation.MetadataCleared() {
 		_spec.ClearField(history.FieldMetadata, field.TypeJSON)
 	}
+	_spec.AddModifiers(hu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, hu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{history.Label}
@@ -214,9 +222,10 @@ func (hu *HistoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // HistoryUpdateOne is the builder for updating a single History entity.
 type HistoryUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *HistoryMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *HistoryMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetTableName sets the "table_name" field.
@@ -362,6 +371,12 @@ func (huo *HistoryUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (huo *HistoryUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *HistoryUpdateOne {
+	huo.modifiers = append(huo.modifiers, modifiers...)
+	return huo
+}
+
 func (huo *HistoryUpdateOne) sqlSave(ctx context.Context) (_node *History, err error) {
 	_spec := sqlgraph.NewUpdateSpec(history.Table, history.Columns, sqlgraph.NewFieldSpec(history.FieldID, field.TypeString))
 	id, ok := huo.mutation.ID()
@@ -421,6 +436,7 @@ func (huo *HistoryUpdateOne) sqlSave(ctx context.Context) (_node *History, err e
 	if huo.mutation.MetadataCleared() {
 		_spec.ClearField(history.FieldMetadata, field.TypeJSON)
 	}
+	_spec.AddModifiers(huo.modifiers...)
 	_node = &History{config: huo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

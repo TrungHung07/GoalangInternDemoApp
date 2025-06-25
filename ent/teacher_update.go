@@ -18,8 +18,9 @@ import (
 // TeacherUpdate is the builder for updating Teacher entities.
 type TeacherUpdate struct {
 	config
-	hooks    []Hook
-	mutation *TeacherMutation
+	hooks     []Hook
+	mutation  *TeacherMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the TeacherUpdate builder.
@@ -167,6 +168,12 @@ func (tu *TeacherUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (tu *TeacherUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TeacherUpdate {
+	tu.modifiers = append(tu.modifiers, modifiers...)
+	return tu
+}
+
 func (tu *TeacherUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := tu.check(); err != nil {
 		return n, err
@@ -223,6 +230,7 @@ func (tu *TeacherUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(tu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{teacher.Label}
@@ -238,9 +246,10 @@ func (tu *TeacherUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // TeacherUpdateOne is the builder for updating a single Teacher entity.
 type TeacherUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *TeacherMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *TeacherMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetName sets the "name" field.
@@ -395,6 +404,12 @@ func (tuo *TeacherUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (tuo *TeacherUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TeacherUpdateOne {
+	tuo.modifiers = append(tuo.modifiers, modifiers...)
+	return tuo
+}
+
 func (tuo *TeacherUpdateOne) sqlSave(ctx context.Context) (_node *Teacher, err error) {
 	if err := tuo.check(); err != nil {
 		return _node, err
@@ -468,6 +483,7 @@ func (tuo *TeacherUpdateOne) sqlSave(ctx context.Context) (_node *Teacher, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(tuo.modifiers...)
 	_node = &Teacher{config: tuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

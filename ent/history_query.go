@@ -22,6 +22,7 @@ type HistoryQuery struct {
 	order      []history.OrderOption
 	inters     []Interceptor
 	predicates []predicate.History
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -251,8 +252,9 @@ func (hq *HistoryQuery) Clone() *HistoryQuery {
 		inters:     append([]Interceptor{}, hq.inters...),
 		predicates: append([]predicate.History{}, hq.predicates...),
 		// clone intermediate query.
-		sql:  hq.sql.Clone(),
-		path: hq.path,
+		sql:       hq.sql.Clone(),
+		path:      hq.path,
+		modifiers: append([]func(*sql.Selector){}, hq.modifiers...),
 	}
 }
 
@@ -343,6 +345,9 @@ func (hq *HistoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Hist
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
+	if len(hq.modifiers) > 0 {
+		_spec.Modifiers = hq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -357,6 +362,9 @@ func (hq *HistoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Hist
 
 func (hq *HistoryQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := hq.querySpec()
+	if len(hq.modifiers) > 0 {
+		_spec.Modifiers = hq.modifiers
+	}
 	_spec.Node.Columns = hq.ctx.Fields
 	if len(hq.ctx.Fields) > 0 {
 		_spec.Unique = hq.ctx.Unique != nil && *hq.ctx.Unique
@@ -419,6 +427,9 @@ func (hq *HistoryQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if hq.ctx.Unique != nil && *hq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range hq.modifiers {
+		m(selector)
+	}
 	for _, p := range hq.predicates {
 		p(selector)
 	}
@@ -434,6 +445,12 @@ func (hq *HistoryQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (hq *HistoryQuery) Modify(modifiers ...func(s *sql.Selector)) *HistorySelect {
+	hq.modifiers = append(hq.modifiers, modifiers...)
+	return hq.Select()
 }
 
 // HistoryGroupBy is the group-by builder for History entities.
@@ -524,4 +541,10 @@ func (hs *HistorySelect) sqlScan(ctx context.Context, root *HistoryQuery, v any)
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (hs *HistorySelect) Modify(modifiers ...func(s *sql.Selector)) *HistorySelect {
+	hs.modifiers = append(hs.modifiers, modifiers...)
+	return hs
 }

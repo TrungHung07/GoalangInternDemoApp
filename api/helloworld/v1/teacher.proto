@@ -5,6 +5,7 @@ package helloworld.v1;
 option go_package = "DemoApp/api/helloworld/v1;v1";
 
 // Request để lấy 1 giáo viên theo ID
+//kratos proto client ./api/helloworld/v1/teacher.proto
 message GetTeacherRequest {
   int64 id = 1;
 }
@@ -37,7 +38,18 @@ message DeleteTeacherRequest {
 }
 
 // Request để lấy danh sách tất cả giáo viên
-message ListTeachersRequest {}
+message ListTeachersRequest {
+  optional int32 page =1 ;
+  optional int32 page_size=2;
+  optional FilterTeacherRequest fitler =3;
+
+}
+
+message FilterTeacherRequest {
+  optional int32 maxAge =1;
+  optional int32 minAge =2;
+  optional int32 email =3;
+}
 
 
 // Response khi tạo xong giáo viên

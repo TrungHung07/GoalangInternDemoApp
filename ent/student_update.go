@@ -18,8 +18,9 @@ import (
 // StudentUpdate is the builder for updating Student entities.
 type StudentUpdate struct {
 	config
-	hooks    []Hook
-	mutation *StudentMutation
+	hooks     []Hook
+	mutation  *StudentMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the StudentUpdate builder.
@@ -127,6 +128,12 @@ func (su *StudentUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (su *StudentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *StudentUpdate {
+	su.modifiers = append(su.modifiers, modifiers...)
+	return su
+}
+
 func (su *StudentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := su.check(); err != nil {
 		return n, err
@@ -174,6 +181,7 @@ func (su *StudentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(su.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{student.Label}
@@ -189,9 +197,10 @@ func (su *StudentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // StudentUpdateOne is the builder for updating a single Student entity.
 type StudentUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *StudentMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *StudentMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetName sets the "name" field.
@@ -306,6 +315,12 @@ func (suo *StudentUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (suo *StudentUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *StudentUpdateOne {
+	suo.modifiers = append(suo.modifiers, modifiers...)
+	return suo
+}
+
 func (suo *StudentUpdateOne) sqlSave(ctx context.Context) (_node *Student, err error) {
 	if err := suo.check(); err != nil {
 		return _node, err
@@ -370,6 +385,7 @@ func (suo *StudentUpdateOne) sqlSave(ctx context.Context) (_node *Student, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(suo.modifiers...)
 	_node = &Student{config: suo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

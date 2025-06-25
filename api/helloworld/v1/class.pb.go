@@ -21,6 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// kratos proto client ./api/helloworld/v1/class.proto
 type CreateClassRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -181,7 +182,7 @@ type ListClassRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Page          uint32                 `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                         // Số trang
 	PageSize      uint32                 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // Số lượng bản ghi trên mỗi trang
-	Filter        *ClassFilterRequest    `protobuf:"bytes,3,opt,name=filter,proto3" json:"filter,omitempty"`
+	Filter        *ClassFilterRequest    `protobuf:"bytes,3,opt,name=filter,proto3,oneof" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -786,11 +787,12 @@ const file_api_helloworld_v1_class_proto_rawDesc = "" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
 	"\x05grade\x18\x03 \x01(\x03R\x05grade\"$\n" +
 	"\x12DeleteClassRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"~\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\x8e\x01\n" +
 	"\x10ListClassRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\rR\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\rR\bpageSize\x129\n" +
-	"\x06filter\x18\x03 \x01(\v2!.helloworld.v1.ClassFilterRequestR\x06filter\"\xb2\x02\n" +
+	"\tpage_size\x18\x02 \x01(\rR\bpageSize\x12>\n" +
+	"\x06filter\x18\x03 \x01(\v2!.helloworld.v1.ClassFilterRequestH\x00R\x06filter\x88\x01\x01B\t\n" +
+	"\a_filter\"\xb2\x02\n" +
 	"\x12ClassFilterRequest\x12\x17\n" +
 	"\x04name\x18\x03 \x01(\tH\x00R\x04name\x88\x01\x01\x12\"\n" +
 	"\n" +
@@ -881,6 +883,7 @@ func file_api_helloworld_v1_class_proto_init() {
 	if File_api_helloworld_v1_class_proto != nil {
 		return
 	}
+	file_api_helloworld_v1_class_proto_msgTypes[3].OneofWrappers = []any{}
 	file_api_helloworld_v1_class_proto_msgTypes[4].OneofWrappers = []any{}
 	file_api_helloworld_v1_class_proto_msgTypes[13].OneofWrappers = []any{}
 	type x struct{}

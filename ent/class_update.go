@@ -19,8 +19,9 @@ import (
 // ClassUpdate is the builder for updating Class entities.
 type ClassUpdate struct {
 	config
-	hooks    []Hook
-	mutation *ClassMutation
+	hooks     []Hook
+	mutation  *ClassMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the ClassUpdate builder.
@@ -182,6 +183,12 @@ func (cu *ClassUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (cu *ClassUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ClassUpdate {
+	cu.modifiers = append(cu.modifiers, modifiers...)
+	return cu
+}
+
 func (cu *ClassUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(class.Table, class.Columns, sqlgraph.NewFieldSpec(class.FieldID, field.TypeInt))
 	if ps := cu.mutation.predicates; len(ps) > 0 {
@@ -293,6 +300,7 @@ func (cu *ClassUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(cu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{class.Label}
@@ -308,9 +316,10 @@ func (cu *ClassUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // ClassUpdateOne is the builder for updating a single Class entity.
 type ClassUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *ClassMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *ClassMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetName sets the "name" field.
@@ -479,6 +488,12 @@ func (cuo *ClassUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (cuo *ClassUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ClassUpdateOne {
+	cuo.modifiers = append(cuo.modifiers, modifiers...)
+	return cuo
+}
+
 func (cuo *ClassUpdateOne) sqlSave(ctx context.Context) (_node *Class, err error) {
 	_spec := sqlgraph.NewUpdateSpec(class.Table, class.Columns, sqlgraph.NewFieldSpec(class.FieldID, field.TypeInt))
 	id, ok := cuo.mutation.ID()
@@ -607,6 +622,7 @@ func (cuo *ClassUpdateOne) sqlSave(ctx context.Context) (_node *Class, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(cuo.modifiers...)
 	_node = &Class{config: cuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
