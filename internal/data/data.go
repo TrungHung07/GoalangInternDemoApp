@@ -33,6 +33,7 @@ var ProviderSet = wire.NewSet(NewData,
 	NewKafkaHistoryPublisher,
 	NewHistoryHelper,
 	NewHistoryRepo,
+	NewTeacherRepo,
 	ProvideKafkaBrokers,
 	ProvideKafkaTopic,
 )
@@ -40,9 +41,10 @@ var ProviderSet = wire.NewSet(NewData,
 // Data .
 type Data struct {
 	// TODO wrapped database client
-	DB    *ent.Client
-	Redis *redis.Client
-	Kafka *KafkaProducer
+	DB         *ent.Client
+	Redis      *redis.Client
+	Kafka      *KafkaProducer
+	RedisCache biz.Cache
 	// HistoryHelper *HistoryHelper
 }
 
@@ -98,14 +100,15 @@ func NewData(c *conf.Data, redisClient *redis.Client, logger log.Logger, kafkaPr
 	if e := client.Schema.Create(ctx); e != nil {
 		log.Fatalf("failed to creating schema resourses :%v ", e)
 	}
-
+	cache := biz.NewRedisCache(redisClient)
 	return &Data{
-		DB:    client,
-		Redis: redisClient,
-		Kafka: kafkaProducer,
+		DB:         client,
+		Redis:      redisClient,
+		Kafka:      kafkaProducer,
+		RedisCache: cache,
 		// HistoryHelper: historyHelper,
 	}, cleanup, nil
-}
+}		
 
 type KafkaHistoryPublisher struct {
 	producer *KafkaProducer

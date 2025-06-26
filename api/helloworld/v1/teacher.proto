@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package helloworld.v1;
+import "google/api/annotations.proto";
 
 option go_package = "DemoApp/api/helloworld/v1;v1";
 
@@ -16,6 +17,7 @@ message TeacherReply {
   string name = 2;
   string email =3;
   string class_name = 4; 
+  int32 age = 5;
 }
 
 // Request để tạo mới giáo viên
@@ -39,8 +41,8 @@ message DeleteTeacherRequest {
 
 // Request để lấy danh sách tất cả giáo viên
 message ListTeachersRequest {
-  optional int32 page =1 ;
-  optional int32 page_size=2;
+  uint32 page =1 ;
+  uint32 page_size=2;
   optional FilterTeacherRequest fitler =3;
 
 }
@@ -48,7 +50,7 @@ message ListTeachersRequest {
 message FilterTeacherRequest {
   optional int32 maxAge =1;
   optional int32 minAge =2;
-  optional int32 email =3;
+  optional string email =3;
 }
 
 
@@ -75,11 +77,36 @@ message ListTeachersReply {
 
 // gRPC Service định nghĩa các hàm cho Teacher
 service TeacherService {
-  rpc GetTeacher(GetTeacherRequest) returns (TeacherReply);
-  rpc CreateTeacher(CreateTeacherRequest) returns (CreateTeacherReply);
-  rpc ListTeachers(ListTeachersRequest) returns (ListTeachersReply);
-  rpc UpdateTeacher(UpdateTeacherRequest) returns (UpdateTeacherReply);
-  rpc DeleteTeacher(DeleteTeacherRequest) returns (DeleteTeacherReply);
+  rpc GetTeacher(GetTeacherRequest) returns (TeacherReply){
+    option (google.api.http) = {
+            get : "api/v1/teacher/{id}",
+            // body : "*"
+        };
+  }
+  rpc CreateTeacher(CreateTeacherRequest) returns (CreateTeacherReply){
+      option (google.api.http) = {
+            post : "api/v1/teacher",
+            body : "*"
+        };
+  }
+  rpc ListTeachers(ListTeachersRequest) returns (ListTeachersReply){
+      option (google.api.http) = {
+            post: "api/v1/teacher/list",
+            body : "*"
+        };
+  }
+  rpc UpdateTeacher(UpdateTeacherRequest) returns (UpdateTeacherReply){
+      option (google.api.http) = {
+            put: "api/v1/teacher",
+            body : "*"
+        };
+  }
+  rpc DeleteTeacher(DeleteTeacherRequest) returns (DeleteTeacherReply){
+      option (google.api.http) = {
+            delete : "api/v1/teacher/{id}"
+            // body : "*"
+        };
+  }
 }
 
 

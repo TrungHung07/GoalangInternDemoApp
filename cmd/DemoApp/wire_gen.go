@@ -23,6 +23,7 @@ import (
 
 // Injectors from wire.go:
 
+// wire ./cmd/DemoApp
 // wireApp init kratos application.
 func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
 	data_Redis := data.NewRedisConfig(confData)
@@ -37,7 +38,9 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	if err != nil {
 		return nil, nil, err
 	}
-	teacherServiceService := service.NewTeacherServiceService(dataData, logger)
+	teacherRepo := data.NewTeacherRepo(dataData, logger)
+	teacherUseCase := biz.NewTeacherUsecase(teacherRepo, logger)
+	teacherServiceService := service.NewTeacherServiceService(dataData, teacherUseCase, logger)
 	historyRepo := data.NewHistoryRepo(dataData)
 	historyEventPublisher := data.NewKafkaHistoryPublisher(kafkaProducer)
 	historyUsecase := biz.NewHistoryUsecase(historyRepo, historyEventPublisher, logger)
@@ -45,7 +48,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	classServiceService := service.NewClassServiceService(dataData, logger, historyHelper)
 	studentServiceService := service.NewStudentServiceService(dataData, logger, historyHelper)
 	grpcServer := server.NewGRPCServer(confServer, logger, teacherServiceService, classServiceService, studentServiceService)
-	httpServer := server.NewHTTPServer(confServer, logger, classServiceService, studentServiceService)
+	httpServer := server.NewHTTPServer(confServer, logger, classServiceService, studentServiceService, teacherServiceService)
 	kafkaBrokers := service.ProvideKafkaBrokers()
 	kafkaGroupID := service.ProvideKafkaGroupID()
 	kafkaTopic := service.ProvideKafkaTopic()

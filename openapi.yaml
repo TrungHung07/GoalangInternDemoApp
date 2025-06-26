@@ -3,8 +3,238 @@
 
 openapi: 3.0.3
 info:
-    title: ""
+    title: TeacherService API
+    description: gRPC Service định nghĩa các hàm cho Teacher
     version: 0.0.1
-paths: {}
+paths:
+    api/v1/teacher:
+        put:
+            tags:
+                - TeacherService
+            operationId: TeacherService_UpdateTeacher
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateTeacherRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateTeacherReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - TeacherService
+            operationId: TeacherService_CreateTeacher
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateTeacherRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateTeacherReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    api/v1/teacher/list:
+        post:
+            tags:
+                - TeacherService
+            operationId: TeacherService_ListTeachers
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ListTeachersRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListTeachersReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    api/v1/teacher/{id}:
+        get:
+            tags:
+                - TeacherService
+            operationId: TeacherService_GetTeacher
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TeacherReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - TeacherService
+            operationId: TeacherService_DeleteTeacher
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteTeacherReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
 components:
-    schemas: {}
+    schemas:
+        CreateTeacherReply:
+            type: object
+            properties:
+                message:
+                    type: string
+            description: Response khi tạo xong giáo viên
+        CreateTeacherRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                email:
+                    type: string
+                classId:
+                    type: integer
+                    format: int32
+            description: Request để tạo mới giáo viên
+        DeleteTeacherReply:
+            type: object
+            properties:
+                message:
+                    type: string
+        FilterTeacherRequest:
+            type: object
+            properties:
+                maxAge:
+                    type: integer
+                    format: int32
+                minAge:
+                    type: integer
+                    format: int32
+                email:
+                    type: string
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        ListTeachersReply:
+            type: object
+            properties:
+                teachers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/TeacherReply'
+            description: Response trả về danh sách giáo viên
+        ListTeachersRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: uint32
+                pageSize:
+                    type: integer
+                    format: uint32
+                fitler:
+                    $ref: '#/components/schemas/FilterTeacherRequest'
+            description: Request để lấy danh sách tất cả giáo viên
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        TeacherReply:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                email:
+                    type: string
+                className:
+                    type: string
+                age:
+                    type: integer
+                    format: int32
+            description: Response khi trả về thông tin giáo viên
+        UpdateTeacherReply:
+            type: object
+            properties:
+                message:
+                    type: string
+        UpdateTeacherRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                email:
+                    type: string
+                grade:
+                    type: integer
+                    format: int32
+tags:
+    - name: TeacherService

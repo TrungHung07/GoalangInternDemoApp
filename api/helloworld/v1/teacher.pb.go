@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -22,6 +23,7 @@ const (
 )
 
 // Request để lấy 1 giáo viên theo ID
+// kratos proto client ./api/helloworld/v1/teacher.proto
 type GetTeacherRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -73,6 +75,7 @@ type TeacherReply struct {
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
 	ClassName     string                 `protobuf:"bytes,4,opt,name=class_name,json=className,proto3" json:"class_name,omitempty"`
+	Age           int32                  `protobuf:"varint,5,opt,name=age,proto3" json:"age,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -133,6 +136,13 @@ func (x *TeacherReply) GetClassName() string {
 		return x.ClassName
 	}
 	return ""
+}
+
+func (x *TeacherReply) GetAge() int32 {
+	if x != nil {
+		return x.Age
+	}
+	return 0
 }
 
 // Request để tạo mới giáo viên
@@ -311,8 +321,8 @@ func (x *DeleteTeacherRequest) GetId() int64 {
 // Request để lấy danh sách tất cả giáo viên
 type ListTeachersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          *int32                 `protobuf:"varint,1,opt,name=page,proto3,oneof" json:"page,omitempty"`
-	PageSize      *int32                 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3,oneof" json:"page_size,omitempty"`
+	Page          uint32                 `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      uint32                 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	Fitler        *FilterTeacherRequest  `protobuf:"bytes,3,opt,name=fitler,proto3,oneof" json:"fitler,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -348,16 +358,16 @@ func (*ListTeachersRequest) Descriptor() ([]byte, []int) {
 	return file_api_helloworld_v1_teacher_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *ListTeachersRequest) GetPage() int32 {
-	if x != nil && x.Page != nil {
-		return *x.Page
+func (x *ListTeachersRequest) GetPage() uint32 {
+	if x != nil {
+		return x.Page
 	}
 	return 0
 }
 
-func (x *ListTeachersRequest) GetPageSize() int32 {
-	if x != nil && x.PageSize != nil {
-		return *x.PageSize
+func (x *ListTeachersRequest) GetPageSize() uint32 {
+	if x != nil {
+		return x.PageSize
 	}
 	return 0
 }
@@ -373,7 +383,7 @@ type FilterTeacherRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MaxAge        *int32                 `protobuf:"varint,1,opt,name=maxAge,proto3,oneof" json:"maxAge,omitempty"`
 	MinAge        *int32                 `protobuf:"varint,2,opt,name=minAge,proto3,oneof" json:"minAge,omitempty"`
-	Email         *int32                 `protobuf:"varint,3,opt,name=email,proto3,oneof" json:"email,omitempty"`
+	Email         *string                `protobuf:"bytes,3,opt,name=email,proto3,oneof" json:"email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -422,11 +432,11 @@ func (x *FilterTeacherRequest) GetMinAge() int32 {
 	return 0
 }
 
-func (x *FilterTeacherRequest) GetEmail() int32 {
+func (x *FilterTeacherRequest) GetEmail() string {
 	if x != nil && x.Email != nil {
 		return *x.Email
 	}
-	return 0
+	return ""
 }
 
 // Response khi tạo xong giáo viên
@@ -611,15 +621,16 @@ var File_api_helloworld_v1_teacher_proto protoreflect.FileDescriptor
 
 const file_api_helloworld_v1_teacher_proto_rawDesc = "" +
 	"\n" +
-	"\x1fapi/helloworld/v1/teacher.proto\x12\rhelloworld.v1\"#\n" +
+	"\x1fapi/helloworld/v1/teacher.proto\x12\rhelloworld.v1\x1a\x1cgoogle/api/annotations.proto\"#\n" +
 	"\x11GetTeacherRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"g\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"y\n" +
 	"\fTeacherReply\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\x1d\n" +
 	"\n" +
-	"class_name\x18\x04 \x01(\tR\tclassName\"[\n" +
+	"class_name\x18\x04 \x01(\tR\tclassName\x12\x10\n" +
+	"\x03age\x18\x05 \x01(\x05R\x03age\"[\n" +
 	"\x14CreateTeacherRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x19\n" +
@@ -630,19 +641,16 @@ const file_api_helloworld_v1_teacher_proto_rawDesc = "" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\x14\n" +
 	"\x05grade\x18\x04 \x01(\x05R\x05grade\"&\n" +
 	"\x14DeleteTeacherRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"\xb4\x01\n" +
-	"\x13ListTeachersRequest\x12\x17\n" +
-	"\x04page\x18\x01 \x01(\x05H\x00R\x04page\x88\x01\x01\x12 \n" +
-	"\tpage_size\x18\x02 \x01(\x05H\x01R\bpageSize\x88\x01\x01\x12@\n" +
-	"\x06fitler\x18\x03 \x01(\v2#.helloworld.v1.FilterTeacherRequestH\x02R\x06fitler\x88\x01\x01B\a\n" +
-	"\x05_pageB\f\n" +
-	"\n" +
-	"_page_sizeB\t\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\x93\x01\n" +
+	"\x13ListTeachersRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\rR\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\rR\bpageSize\x12@\n" +
+	"\x06fitler\x18\x03 \x01(\v2#.helloworld.v1.FilterTeacherRequestH\x00R\x06fitler\x88\x01\x01B\t\n" +
 	"\a_fitler\"\x8b\x01\n" +
 	"\x14FilterTeacherRequest\x12\x1b\n" +
 	"\x06maxAge\x18\x01 \x01(\x05H\x00R\x06maxAge\x88\x01\x01\x12\x1b\n" +
 	"\x06minAge\x18\x02 \x01(\x05H\x01R\x06minAge\x88\x01\x01\x12\x19\n" +
-	"\x05email\x18\x03 \x01(\x05H\x02R\x05email\x88\x01\x01B\t\n" +
+	"\x05email\x18\x03 \x01(\tH\x02R\x05email\x88\x01\x01B\t\n" +
 	"\a_maxAgeB\t\n" +
 	"\a_minAgeB\b\n" +
 	"\x06_email\".\n" +
@@ -653,14 +661,14 @@ const file_api_helloworld_v1_teacher_proto_rawDesc = "" +
 	"\x12UpdateTeacherReply\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"L\n" +
 	"\x11ListTeachersReply\x127\n" +
-	"\bteachers\x18\x01 \x03(\v2\x1b.helloworld.v1.TeacherReplyR\bteachers2\xbe\x03\n" +
-	"\x0eTeacherService\x12K\n" +
+	"\bteachers\x18\x01 \x03(\v2\x1b.helloworld.v1.TeacherReplyR\bteachers2\xce\x04\n" +
+	"\x0eTeacherService\x12h\n" +
 	"\n" +
-	"GetTeacher\x12 .helloworld.v1.GetTeacherRequest\x1a\x1b.helloworld.v1.TeacherReply\x12W\n" +
-	"\rCreateTeacher\x12#.helloworld.v1.CreateTeacherRequest\x1a!.helloworld.v1.CreateTeacherReply\x12T\n" +
-	"\fListTeachers\x12\".helloworld.v1.ListTeachersRequest\x1a .helloworld.v1.ListTeachersReply\x12W\n" +
-	"\rUpdateTeacher\x12#.helloworld.v1.UpdateTeacherRequest\x1a!.helloworld.v1.UpdateTeacherReply\x12W\n" +
-	"\rDeleteTeacher\x12#.helloworld.v1.DeleteTeacherRequest\x1a!.helloworld.v1.DeleteTeacherReplyB\x1eZ\x1cDemoApp/api/helloworld/v1;v1b\x06proto3"
+	"GetTeacher\x12 .helloworld.v1.GetTeacherRequest\x1a\x1b.helloworld.v1.TeacherReply\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13api/v1/teacher/{id}\x12r\n" +
+	"\rCreateTeacher\x12#.helloworld.v1.CreateTeacherRequest\x1a!.helloworld.v1.CreateTeacherReply\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0eapi/v1/teacher\x12t\n" +
+	"\fListTeachers\x12\".helloworld.v1.ListTeachersRequest\x1a .helloworld.v1.ListTeachersReply\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13api/v1/teacher/list\x12r\n" +
+	"\rUpdateTeacher\x12#.helloworld.v1.UpdateTeacherRequest\x1a!.helloworld.v1.UpdateTeacherReply\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\x1a\x0eapi/v1/teacher\x12t\n" +
+	"\rDeleteTeacher\x12#.helloworld.v1.DeleteTeacherRequest\x1a!.helloworld.v1.DeleteTeacherReply\"\x1b\x82\xd3\xe4\x93\x02\x15*\x13api/v1/teacher/{id}B\x1eZ\x1cDemoApp/api/helloworld/v1;v1b\x06proto3"
 
 var (
 	file_api_helloworld_v1_teacher_proto_rawDescOnce sync.Once
