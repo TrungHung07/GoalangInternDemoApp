@@ -1,4 +1,4 @@
-// filepath: ent/schema/teacher.go
+// Package schema filepath: ent/schema/teacher.go
 package schema
 
 import (
@@ -23,10 +23,12 @@ func (Teacher) Fields() []ent.Field {
 	}
 }
 
+// TableName define name of table for orm
 func (Teacher) TableName() string {
 	return "teachers"
 }
 
+// Edges define relations of entity to each other.
 func (Teacher) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("classes", Class.Type).Unique().Required().Field("class_id"),

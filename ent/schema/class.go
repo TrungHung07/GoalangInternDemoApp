@@ -1,4 +1,4 @@
-// filepath: ent/schema/teacher.go
+// Package schema filepath: ent/schema/teacher.go
 package schema
 
 import (
@@ -7,12 +7,12 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// Teacher holds the schema definition for the Teacher entity.
+// Class holds the schema definition for the Class entity.
 type Class struct {
 	ent.Schema
 }
 
-// Fields of the Teacher.
+// Fields of the Class.
 func (Class) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
@@ -21,10 +21,12 @@ func (Class) Fields() []ent.Field {
 	}
 }
 
+// TableName overide name
 func (Class) TableName() string {
 	return "class"
 }
 
+// Edges to map entity
 func (Class) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("students", Student.Type).Ref("classes"),
