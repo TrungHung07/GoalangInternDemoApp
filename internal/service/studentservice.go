@@ -14,6 +14,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
+// StudentServiceService handles the student-related business logic at the service layer
 type StudentServiceService struct {
 	pb.UnimplementedStudentServiceServer
 	data          *data.Data
@@ -21,6 +22,7 @@ type StudentServiceService struct {
 	hisotryHelper *data.HistoryHelper
 }
 
+// NewStudentServiceService creates a new instance of StudentServiceService with the given data layer, logger, and history helper.
 func NewStudentServiceService(data *data.Data, logger log.Logger, helper *data.HistoryHelper) *StudentServiceService {
 	return &StudentServiceService{
 		data:          data,
@@ -28,6 +30,7 @@ func NewStudentServiceService(data *data.Data, logger log.Logger, helper *data.H
 		hisotryHelper: helper,
 	}
 }
+
 
 func studentPagination(query *ent.StudentQuery, page, pageSize int) *ent.StudentQuery {
 	if page <= 0 {
@@ -55,6 +58,8 @@ func (s *StudentServiceService) invalidateStudentListCache(ctx context.Context) 
 	}
 }
 
+// CreateStudent adds a new class using the business layer.
+// It returns a CreateCreateStudentReply containing the result for the client.
 func (s *StudentServiceService) CreateStudent(ctx context.Context, req *pb.CreateStudentRequest) (*pb.CreateStudentReply, error) {
 	studentData := &ent.Student{
 		Name:      req.Name,
@@ -81,6 +86,8 @@ func (s *StudentServiceService) CreateStudent(ctx context.Context, req *pb.Creat
 	return &pb.CreateStudentReply{Message: "Thêm thành công 1 học sinh mới "}, nil
 }
 
+//UpdateStudent update a existed student using the business layer 
+//It returns a UpdateStudentReply containing the result for the client 
 func (s *StudentServiceService) UpdateStudent(ctx context.Context, req *pb.UpdateStudentRequest) (*pb.UpdateStudentReply, error) {
 
 	studentEntity, err := s.data.DB.Student.Get(ctx, int(req.Id))
@@ -107,6 +114,8 @@ func (s *StudentServiceService) UpdateStudent(ctx context.Context, req *pb.Updat
 	return &pb.UpdateStudentReply{Message: "Cập nhật thành công học sinh "}, nil
 }
 
+// DeleteStudent removes a student from the database using the provided student ID.
+// It returns a DeleteStudentReply indicating the result of the operation.
 func (s *StudentServiceService) DeleteStudent(ctx context.Context, req *pb.DeleteStudentRequest) (*pb.DeleteStudentReply, error) {
 	err := s.data.DB.Student.UpdateOneID(int(req.Id)).SetIsDeleted(true).Exec(ctx)
 	if err != nil {
@@ -120,6 +129,8 @@ func (s *StudentServiceService) DeleteStudent(ctx context.Context, req *pb.Delet
 	return &pb.DeleteStudentReply{Message: "Xóa thành công học sinh này !"}, nil
 }
 
+// ListStudent get all students from the database which match filters ,paginations 
+// It returns a ListStudentsReply containing the result for the client 
 func (s *StudentServiceService) ListStudent(ctx context.Context, req *pb.ListStudentRequest) (*pb.ListStudentReply, error) {
 
 	cacheKey := fmt.Sprintf("student:list:%d:%d", req.Page, req.PageSize)
@@ -174,6 +185,8 @@ func (s *StudentServiceService) ListStudent(ctx context.Context, req *pb.ListStu
 	return reply, nil
 }
 
+// GetStudent get a existed student from the database with provided Id
+// It returns a GetStuddentReplyy containing the result for the client 
 func (s *StudentServiceService) GetStudent(ctx context.Context, req *pb.GetStudentRequest) (*pb.GetStudentReply, error) {
 
 	cacheKey := fmt.Sprintf("student:%d", req.Id)

@@ -17,6 +17,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
+//TeacherServiceService handles the teacher-related business logic at the service layer
 type TeacherServiceService struct {
 	pb.UnimplementedTeacherServiceServer
 	data           *data.Data
@@ -24,6 +25,7 @@ type TeacherServiceService struct {
 	teacherUsecase *biz.TeacherUseCase
 }
 
+// NewTeacherServiceService creates a new instance of TeacherServiceService with the given data layer, use case logic, and logger.
 func NewTeacherServiceService(data *data.Data, usecase *biz.TeacherUseCase, logger log.Logger) *TeacherServiceService {
 	return &TeacherServiceService{
 		data:           data,
@@ -32,11 +34,15 @@ func NewTeacherServiceService(data *data.Data, usecase *biz.TeacherUseCase, logg
 	}
 }
 
+
+// GetTeacher retrieves a teacher by ID and returns the corresponding TeacherReply.
 func (s *TeacherServiceService) GetTeacher(ctx context.Context, req *pb.GetTeacherRequest) (*pb.TeacherReply, error) {
 
 	return &pb.TeacherReply{}, nil
 }
 
+// CreateTeacher adds a new teacher to the system based on the provided request data.
+// It returns a CreateTeacherReply containing the newly created teacher's information.
 func (s *TeacherServiceService) CreateTeacher(ctx context.Context, req *pb.CreateTeacherRequest) (*pb.CreateTeacherReply, error) {
 	// teacher, err := s.data.DB.Teacher.Create().
 	// 	SetName(req.Name).
@@ -51,6 +57,8 @@ func (s *TeacherServiceService) CreateTeacher(ctx context.Context, req *pb.Creat
 	return &pb.CreateTeacherReply{Message: "Thêm thành công !"}, nil
 }
 
+// UpdateTeacher modifies the information of an existing teacher based on the request.
+// It returns an UpdateTeacherReply with the updated data.
 func (s *TeacherServiceService) UpdateTeacher(ctx context.Context, req *pb.UpdateTeacherRequest) (*pb.UpdateTeacherReply, error) {
 
 	// teacher, err := s.data.DB.Teacher.Get(ctx, int(req.Id))
@@ -80,6 +88,8 @@ func (s *TeacherServiceService) UpdateTeacher(ctx context.Context, req *pb.Updat
 	return &pb.UpdateTeacherReply{Message: "Cập nhật thành công rồi đó !"}, nil
 }
 
+// DeleteTeacher removes a teacher from the system using the provided ID.
+// It returns a DeleteTeacherReply indicating the result of the deletion.
 func (s *TeacherServiceService) DeleteTeacher(ctx context.Context, req *pb.DeleteTeacherRequest) (*pb.DeleteTeacherReply, error) {
 
 	// err := s.data.DB.Teacher.DeleteOneID(int(req.Id)).Exec(ctx)
@@ -92,6 +102,8 @@ func (s *TeacherServiceService) DeleteTeacher(ctx context.Context, req *pb.Delet
 	return &pb.DeleteTeacherReply{Message: "Xoá thành công !"}, nil
 }
 
+// ListTeachers returns a paginated list of teachers based on the request filters.
+// It returns a ListTeachersReply containing the result set.
 func (s *TeacherServiceService) ListTeachers(ctx context.Context, req *pb.ListTeachersRequest) (*pb.ListTeachersReply, error) {
 	key := fmt.Sprintf("list teachers : %v %v %v", req.Page, req.PageSize, req.Fitler)
 	val, err := s.data.RedisCache.Get(ctx, key)

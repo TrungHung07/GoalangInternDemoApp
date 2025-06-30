@@ -18,6 +18,7 @@ import (
 	// "DemoApp/internal/biz"
 )
 
+// ClassServiceService handles the class-related business logic at the service layer
 type ClassServiceService struct {
 	pb.UnimplementedClassServiceServer
 	s             *data.Data
@@ -25,6 +26,7 @@ type ClassServiceService struct {
 	historyHelper *data.HistoryHelper
 }
 
+// NewClassServiceService creates a new instance of ClassServiceService with the given data layer, logger, and history helper.
 func NewClassServiceService(data *data.Data, logger log.Logger, helper *data.HistoryHelper) *ClassServiceService {
 	return &ClassServiceService{
 		s:             data,
@@ -90,10 +92,12 @@ func (s *ClassServiceService) getClassFromCache(ctx context.Context, key string)
 func (s *ClassServiceService) invalidateClassListCache(ctx context.Context) {
 	iter := s.s.Redis.Scan(ctx, 0, "class:list:*", 0).Iterator()
 	for iter.Next(ctx) {
-		_ = s.s.Redis.Del(ctx, iter.Val()).Err()
+		_ = s.s.Redis.Del(ctx, iter.Val()).Err() 
 	}
 }
 
+// CreateClass adds a new class using the business layer.
+// It returns a CreateClassReply containing the result for the client.
 func (s *ClassServiceService) CreateClass(ctx context.Context, req *pb.CreateClassRequest) (*pb.CreateClassReply, error) {
 	//Tạo một entity
 	classData := &ent.Class{
@@ -123,6 +127,8 @@ func (s *ClassServiceService) CreateClass(ctx context.Context, req *pb.CreateCla
 	return &pb.CreateClassReply{Message: "Thêm lớp học thành công ! "}, nil
 }
 
+//UpdateClass update a existed class using the business layer 
+//It returns a UpdateClassReply containing the result for the client  
 func (s *ClassServiceService) UpdateClass(ctx context.Context, req *pb.UpdateClassRequest) (*pb.UpdateClassReply, error) {
 	classEntity, e := s.s.DB.Class.Get(ctx, int(req.Id))
 	if e != nil {
@@ -150,6 +156,9 @@ func (s *ClassServiceService) UpdateClass(ctx context.Context, req *pb.UpdateCla
 	return &pb.UpdateClassReply{Message: "Cập nhật thành công !"}, nil
 }
 
+
+// DeleteClass removes a class from the database using the provided class ID.
+// It returns a DeleteClassReply indicating the result of the operation.
 func (s *ClassServiceService) DeleteClass(ctx context.Context, req *pb.DeleteClassRequest) (*pb.DeleteClassReply, error) {
 	classEntity, e := s.s.DB.Class.Get(ctx, int(req.Id))
 	if e != nil {
@@ -181,7 +190,7 @@ func applyPagination(query *ent.ClassQuery, page, pageSize int) *ent.ClassQuery 
 	return query.Offset(offset).Limit(pageSize)
 }
 
-func applyClassFilters(query *ent.ClassQuery, req *pb.ListClassRequest, ctx context.Context) *ent.ClassQuery {
+func applyClassFilters(ctx context.Context , query *ent.ClassQuery, req *pb.ListClassRequest) *ent.ClassQuery {
 	filter := req.Filter
 	if filter == nil {
 		return query
@@ -235,14 +244,19 @@ func applyClassFilters(query *ent.ClassQuery, req *pb.ListClassRequest, ctx cont
 	return query
 }
 
+// ListClass get all classes from the database which match filters ,paginations 
+// It returns a ListClassReply containing the result for the client 
 func (s *ClassServiceService) ListClass(ctx context.Context, req *pb.ListClassRequest) (*pb.ListClassReply, error) {
-	cacheKey := fmt.Sprintf("class:list:%v:%v:%v", req.Filter, req.Page, req.PageSize)
+	// max:=int32(0); minT:=int32(0) ;
+	// if req.Filter.MaxClassStudentQuantity == nil {maxQ =0}
+	// if req.Filter.MinClassTeacher != nil {minT = req.Filter.MinClassTeacher }
+	cacheKey := fmt.Sprintf("class:list:%v:%v:%v ", req.Filter, req.Page, req.PageSize)
 	if cached := s.getClassListFromCache(ctx, cacheKey); cached != nil {
 		return cached, nil // ← return luôn nếu cache hit
 	}
 
 	query := s.s.DB.Class.Query()
-	query = applyClassFilters(query, req, ctx)
+	query = applyClassFilters(ctx , query, req )
 	total, e := query.Clone().Count(ctx)
 	if e != nil {
 		return nil, e
@@ -273,6 +287,8 @@ func (s *ClassServiceService) ListClass(ctx context.Context, req *pb.ListClassRe
 // key : string
 // value : string,set,.... JSON
 
+// GetClass geta class from the database with Id
+// It returns a GetClassReply containing the result for the client 
 func (s *ClassServiceService) GetClass(ctx context.Context, req *pb.GetClassRequest) (*pb.GetClassReply, error) {
 	cacheKey := s.buildCacheKey(req.Id) // lấy key
 	if reply, ok := s.getClassFromCache(ctx, cacheKey); ok {

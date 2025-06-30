@@ -9,9 +9,13 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/go-kratos/kratos/v2/log"
 )
-
+// KafkaBrokers represents a list of Kafka broker addresses used for connecting to the Kafka cluster.
 type KafkaBrokers []string
+
+// KafkaGroupID represents the identifier of a Kafka consumer group.
 type KafkaGroupID string
+
+// KafkaTopic represents the name of a Kafka topic used for publishing or consuming messages.
 type KafkaTopic string
 
 // HistoryConsumer handles consuming history events from Kafka
