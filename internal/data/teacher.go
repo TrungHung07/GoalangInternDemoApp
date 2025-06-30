@@ -18,12 +18,13 @@ type teacherRepo struct {
 	log  *log.Helper
 }
 
+// NewTeacherRepo creates and returns a new instance of TeacherRepo using the provided data layer and logger.
 func NewTeacherRepo(data *Data, logger log.Logger) biz.TeacherRepo {
 	return &teacherRepo{
 		data: data,
-		log:  log.NewHelper(logger),
+		log:  log.NewHelper(logger),	
 	}
-}
+} 
 
 func applyPagination(query *ent.TeacherQuery, p common.Pagination) *ent.TeacherQuery {
 	return query.Limit(p.Limit()).Offset(p.Offset())

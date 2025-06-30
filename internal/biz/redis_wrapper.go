@@ -7,6 +7,7 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+// Cache defines a generic caching interface for storing, retrieving, and deleting data
 type Cache interface {
 	Set(ctx context.Context, key string, value []byte, ttl time.Duration) error
 	Get(ctx context.Context, key string) ([]byte, error)
@@ -17,6 +18,7 @@ type redisCache struct {
 	client *redis.Client
 }
 
+// NewRedisCache returns a new Cache implementation backed by a Redis client.
 func NewRedisCache(client *redis.Client) Cache {
 	return &redisCache{client: client}
 }

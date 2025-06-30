@@ -14,13 +14,17 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/wire"
+	
+	// Import pq driver for PostgreSQL
 	_ "github.com/lib/pq"
 )
 
+// ProvideKafkaBrokers returns the list of Kafka broker addresses used to connect to the Kafka cluster.
 func ProvideKafkaBrokers() []string {
 	return []string{"localhost:9092"}
 }
 
+// ProvideKafkaTopic returns the name of the Kafka topic used for publishing history events.
 func ProvideKafkaTopic() string {
 	return "history-topic"
 }
@@ -110,6 +114,7 @@ func NewData(c *conf.Data, redisClient *redis.Client, logger log.Logger, kafkaPr
 	}, cleanup, nil
 }		
 
+// KafkaHistoryPublisher is responsible for publishing history-related messages to a Kafka topic.
 type KafkaHistoryPublisher struct {
 	producer *KafkaProducer
 }

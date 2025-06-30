@@ -5,6 +5,8 @@ import (
 	"context"
 )
 
+// IRepository defines a generic repository interface for performing basic CRUD operations
+// on any entity type T. It supports pagination and optional filtering.
 type IRepository[T any] interface {
 	Create(ctx context.Context, input *T) (*T, error)
 	Update(ctx context.Context, input *T, id int64) error

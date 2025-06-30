@@ -11,6 +11,7 @@ type historyRepo struct {
 	data *Data
 }
 
+// NewHistoryRepo creates and returns a new HistoryRepo instance using the provided data source.
 func NewHistoryRepo(data *Data) biz.HistoryRepo {
 	return &historyRepo{data: data}
 }

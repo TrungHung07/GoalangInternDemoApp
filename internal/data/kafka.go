@@ -87,7 +87,7 @@ func (kp *KafkaProducer) PublishHistoryEvent(ctx context.Context, event *History
 	return nil
 }
 
-// đóng producer để giải phóng tài nguyên
+// Close producer để giải phóng tài nguyên
 func (kp *KafkaProducer) Close() error {
 	return kp.producer.Close()
 }
