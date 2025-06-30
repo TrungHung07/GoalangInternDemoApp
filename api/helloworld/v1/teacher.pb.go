@@ -151,6 +151,7 @@ type CreateTeacherRequest struct {
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	ClassId       int32                  `protobuf:"varint,3,opt,name=class_id,json=classId,proto3" json:"class_id,omitempty"`
+	Age           int32                  `protobuf:"varint,4,opt,name=age,proto3" json:"age,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -206,12 +207,20 @@ func (x *CreateTeacherRequest) GetClassId() int32 {
 	return 0
 }
 
+func (x *CreateTeacherRequest) GetAge() int32 {
+	if x != nil {
+		return x.Age
+	}
+	return 0
+}
+
 type UpdateTeacherRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Grade         int32                  `protobuf:"varint,4,opt,name=grade,proto3" json:"grade,omitempty"`
+	Id            *int64                 `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`
+	Name          *string                `protobuf:"bytes,2,opt,name=name,proto3,oneof" json:"name,omitempty"`
+	Email         *string                `protobuf:"bytes,3,opt,name=email,proto3,oneof" json:"email,omitempty"`
+	Age           *int32                 `protobuf:"varint,4,opt,name=age,proto3,oneof" json:"age,omitempty"`
+	ClassId       *int64                 `protobuf:"varint,5,opt,name=class_id,json=classId,proto3,oneof" json:"class_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -247,29 +256,36 @@ func (*UpdateTeacherRequest) Descriptor() ([]byte, []int) {
 }
 
 func (x *UpdateTeacherRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
+	if x != nil && x.Id != nil {
+		return *x.Id
 	}
 	return 0
 }
 
 func (x *UpdateTeacherRequest) GetName() string {
-	if x != nil {
-		return x.Name
+	if x != nil && x.Name != nil {
+		return *x.Name
 	}
 	return ""
 }
 
 func (x *UpdateTeacherRequest) GetEmail() string {
-	if x != nil {
-		return x.Email
+	if x != nil && x.Email != nil {
+		return *x.Email
 	}
 	return ""
 }
 
-func (x *UpdateTeacherRequest) GetGrade() int32 {
-	if x != nil {
-		return x.Grade
+func (x *UpdateTeacherRequest) GetAge() int32 {
+	if x != nil && x.Age != nil {
+		return *x.Age
+	}
+	return 0
+}
+
+func (x *UpdateTeacherRequest) GetClassId() int64 {
+	if x != nil && x.ClassId != nil {
+		return *x.ClassId
 	}
 	return 0
 }
@@ -630,16 +646,23 @@ const file_api_helloworld_v1_teacher_proto_rawDesc = "" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\x1d\n" +
 	"\n" +
 	"class_name\x18\x04 \x01(\tR\tclassName\x12\x10\n" +
-	"\x03age\x18\x05 \x01(\x05R\x03age\"[\n" +
+	"\x03age\x18\x05 \x01(\x05R\x03age\"m\n" +
 	"\x14CreateTeacherRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x19\n" +
-	"\bclass_id\x18\x03 \x01(\x05R\aclassId\"f\n" +
-	"\x14UpdateTeacherRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\x12\x14\n" +
-	"\x05grade\x18\x04 \x01(\x05R\x05grade\"&\n" +
+	"\bclass_id\x18\x03 \x01(\x05R\aclassId\x12\x10\n" +
+	"\x03age\x18\x04 \x01(\x05R\x03age\"\xc5\x01\n" +
+	"\x14UpdateTeacherRequest\x12\x13\n" +
+	"\x02id\x18\x01 \x01(\x03H\x00R\x02id\x88\x01\x01\x12\x17\n" +
+	"\x04name\x18\x02 \x01(\tH\x01R\x04name\x88\x01\x01\x12\x19\n" +
+	"\x05email\x18\x03 \x01(\tH\x02R\x05email\x88\x01\x01\x12\x15\n" +
+	"\x03age\x18\x04 \x01(\x05H\x03R\x03age\x88\x01\x01\x12\x1e\n" +
+	"\bclass_id\x18\x05 \x01(\x03H\x04R\aclassId\x88\x01\x01B\x05\n" +
+	"\x03_idB\a\n" +
+	"\x05_nameB\b\n" +
+	"\x06_emailB\x06\n" +
+	"\x04_ageB\v\n" +
+	"\t_class_id\"&\n" +
 	"\x14DeleteTeacherRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"\x93\x01\n" +
 	"\x13ListTeachersRequest\x12\x12\n" +
@@ -721,6 +744,7 @@ func file_api_helloworld_v1_teacher_proto_init() {
 	if File_api_helloworld_v1_teacher_proto != nil {
 		return
 	}
+	file_api_helloworld_v1_teacher_proto_msgTypes[3].OneofWrappers = []any{}
 	file_api_helloworld_v1_teacher_proto_msgTypes[5].OneofWrappers = []any{}
 	file_api_helloworld_v1_teacher_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}

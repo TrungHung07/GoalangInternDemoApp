@@ -22,9 +22,9 @@ type teacherRepo struct {
 func NewTeacherRepo(data *Data, logger log.Logger) biz.TeacherRepo {
 	return &teacherRepo{
 		data: data,
-		log:  log.NewHelper(logger),	
+		log:  log.NewHelper(logger),
 	}
-} 
+}
 
 func applyPagination(query *ent.TeacherQuery, p common.Pagination) *ent.TeacherQuery {
 	return query.Limit(p.Limit()).Offset(p.Offset())
@@ -64,33 +64,90 @@ func (r *teacherRepo) FindAll(ctx context.Context, filter filter.TeacherFilter, 
 		}
 
 		result = append(result, &biz.Teacher{
-			Id:         int64(t.ID),
-			Name:       t.Name,
-			Email:      t.Email,
-			Age:        int32(t.Age),
-			Class_id:   int64(t.ClassID),
-			Class_name: className, // <-- bổ sung field nếu bạn có trong `biz.Teacher`
+			ID:        int64(t.ID),
+			Name:      t.Name,
+			Email:     t.Email,
+			Age:       int32(t.Age),
+			ClassID:   int64(t.ClassID),
+			ClassName: className, // <-- bổ sung field nếu bạn có trong `biz.Teacher`
 		})
 	}
 	return result, nil
 }
 
 func (r *teacherRepo) FindByID(ctx context.Context, id int64) (*biz.Teacher, error) {
-	// TODO: implement
-	return nil, nil
+	query := r.data.DB.Teacher.Query().WithClasses().Where(teacher.IDEQ(int(id)))
+	entity, e := query.Only(ctx)
+	if e != nil {
+		return nil, e
+	}
+	result := &biz.Teacher{
+		ID:        int64(entity.ID),
+		Name:      entity.Name,
+		ClassID:   int64(entity.ClassID),
+		ClassName: entity.Edges.Classes.Name,
+		Age:       int32(entity.Age),
+		Email:     entity.Email,
+	}
+	return result, nil
 }
 
 func (r *teacherRepo) Create(ctx context.Context, input *biz.Teacher) (*biz.Teacher, error) {
-	// TODO: implement
-	return nil, nil
+	data := &ent.Teacher{
+		Name:    input.Name,
+		ClassID: int(input.ClassID),
+		Age:     int(input.Age),
+		Email:   input.Email,
+	}
+
+	entity, e := r.data.DB.Teacher.Create().
+		SetName(data.Name).
+		SetEmail(data.Email).
+		SetClassID(data.ClassID).
+		SetIsDeleted(false).
+		SetAge(data.Age).
+		Save(ctx)
+
+	if e != nil {
+		return nil, e
+	}
+
+	result := &biz.Teacher{
+		ID:      int64(entity.ID),
+		Name:    entity.Name,
+		ClassID: int64(entity.ClassID),
+		// ClassName: entity.Edges.Classes.Name,
+		Age:   int32(entity.Age),
+		Email: entity.Email,
+	}
+
+	return result, nil
 }
 
-func (r *teacherRepo) Update(ctx context.Context, input *biz.Teacher, id int64) error {
-	// TODO: implement
-	return nil
+func (r *teacherRepo) Update(ctx context.Context, input *biz.UpdateTeacher, id int64) error {
+	entity := r.data.DB.Teacher.UpdateOneID(int(id))
+	UpdateNonNilField(entity, input)
+	return entity.Exec(ctx)
+}
+
+// UpdateNonNilField skip nil field only update field that have value in json
+func UpdateNonNilField(entity *ent.TeacherUpdateOne, input *biz.UpdateTeacher) {
+	if input.Name != nil {
+		entity.SetName(*input.Name)
+	}
+	if input.Email != nil {
+		entity.SetEmail(*input.Email)
+	}
+	if input.Age != nil {
+		entity.SetAge(int(*input.Age))
+	}
+	if input.ClassID != nil {
+		entity.SetClassID(int(*input.ClassID))
+	}
 }
 
 func (r *teacherRepo) Delete(ctx context.Context, id int64) error {
 	// TODO: implement
-	return nil
+	_, e := r.data.DB.Teacher.UpdateOneID(int(id)).SetIsDeleted(true).Save(ctx)
+	return e
 }

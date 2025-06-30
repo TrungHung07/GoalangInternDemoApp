@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -17,7 +18,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-//TeacherServiceService handles the teacher-related business logic at the service layer
+// TeacherServiceService handles the teacher-related business logic at the service layer
 type TeacherServiceService struct {
 	pb.UnimplementedTeacherServiceServer
 	data           *data.Data
@@ -34,71 +35,94 @@ func NewTeacherServiceService(data *data.Data, usecase *biz.TeacherUseCase, logg
 	}
 }
 
-
 // GetTeacher retrieves a teacher by ID and returns the corresponding TeacherReply.
 func (s *TeacherServiceService) GetTeacher(ctx context.Context, req *pb.GetTeacherRequest) (*pb.TeacherReply, error) {
+	key := fmt.Sprintf("teacher: %v", req.Id)
+	val, err := s.data.RedisCache.Get(ctx, key)
+	if err == nil && len(val) > 0 {
+		s.log.Info("Cache hit for teacher: ", key)
+		reply := &pb.TeacherReply{}
+		if e := json.Unmarshal(val, reply); e == nil {
+			return reply, nil
+		}
+	}
 
-	return &pb.TeacherReply{}, nil
+	entity, e := s.teacherUsecase.FindByID(ctx, req.Id)
+	if e != nil {
+		return nil, e
+	}
+
+	reply := &pb.TeacherReply{
+		Id:        entity.ID,
+		Name:      entity.Name,
+		Age:       entity.Age,
+		Email:     entity.Email,
+		ClassName: entity.ClassName,
+	}
+
+	go func() {
+		if data, e := json.Marshal(reply); e == nil {
+			_ = s.data.RedisCache.Set(ctx, key, data, 10*time.Minute)
+		}
+	}()
+
+	return reply, nil
+}
+
+func (s *TeacherServiceService) invalidateTeacherListCache(ctx context.Context) {
+	iter := s.data.Redis.Scan(ctx, 0, "list teachers : *", 0).Iterator()
+	for iter.Next(ctx) {
+		_ = s.data.Redis.Del(ctx, iter.Val()).Err()
+	}
 }
 
 // CreateTeacher adds a new teacher to the system based on the provided request data.
 // It returns a CreateTeacherReply containing the newly created teacher's information.
 func (s *TeacherServiceService) CreateTeacher(ctx context.Context, req *pb.CreateTeacherRequest) (*pb.CreateTeacherReply, error) {
-	// teacher, err := s.data.DB.Teacher.Create().
-	// 	SetName(req.Name).
-	// 	SetEmail(req.Email).
-	// 	SetClassID(int(req.ClassId)).
-	// 	Save(ctx)
-	// if err != nil {
-	// 	s.log.Error("Failed to create teacher:", err)
-	// 	return nil, err
-	// }
-	// s.log.Infof("Created teacher: %v", teacher)
+	teacher := &biz.Teacher{
+		Name:    req.Name,
+		Email:   req.Email,
+		Age:     req.Age,
+		ClassID: int64(req.ClassId),
+	}
+	_, e := s.teacherUsecase.Create(ctx, teacher)
+	if e != nil {
+		return nil, e
+	}
+	s.invalidateTeacherListCache(ctx)
 	return &pb.CreateTeacherReply{Message: "Thêm thành công !"}, nil
 }
 
 // UpdateTeacher modifies the information of an existing teacher based on the request.
 // It returns an UpdateTeacherReply with the updated data.
 func (s *TeacherServiceService) UpdateTeacher(ctx context.Context, req *pb.UpdateTeacherRequest) (*pb.UpdateTeacherReply, error) {
+	if req.Id == nil {
+		return nil, errors.New("missing teacher ID for update")
+	}
 
-	// teacher, err := s.data.DB.Teacher.Get(ctx, int(req.Id))
-	// s.log.Infof("teacher and error :" + err.Error())
-	// if err != nil {
-	// 	s.log.Error("\nFailed to find teacher ( if is correct !):\n", err)
-	// 	return &pb.UpdateTeacherReply{Message: "Không tìm thấy id!"}, nil
-	// }
-	// update := teacher.Update()
-	// if req.Name != "" {
-	// 	update.SetName(req.Name)
-	// }
-	// if req.Email != "" {
-	// 	update.SetEmail(req.Email)
-	// }
-	// teacherUpdateed, err := update.Save(ctx)
-
-	// if err != nil {
-	// 	return &pb.UpdateTeacherReply{Message: "Cập nhật thất bại!"}, err
-	// }
-	// // teacher, err := s.data.DB.Teacher.UpdateOneID(int(req.Id)).
-	// 	SetName(req.Name).
-	// 	SetEmail(req.Email).
-	// 	SetGrade(int(req.Grade)).
-	// 	Save(ctx)
-	// s.log.Infof("Updated teacher: %v", teacherUpdateed)
+	teacher := &biz.UpdateTeacher{
+		Name:    req.Name,
+		Email:   req.Email,
+		Age:     req.Age,
+		ClassID: req.ClassId,
+	}
+	e := s.teacherUsecase.Update(ctx, teacher, *req.Id)
+	if e != nil {
+		return nil, e
+	}
 	return &pb.UpdateTeacherReply{Message: "Cập nhật thành công rồi đó !"}, nil
 }
 
 // DeleteTeacher removes a teacher from the system using the provided ID.
 // It returns a DeleteTeacherReply indicating the result of the deletion.
 func (s *TeacherServiceService) DeleteTeacher(ctx context.Context, req *pb.DeleteTeacherRequest) (*pb.DeleteTeacherReply, error) {
-
-	// err := s.data.DB.Teacher.DeleteOneID(int(req.Id)).Exec(ctx)
-	// if err != nil {
-	// 	s.log.Error("Failed to delete teacher:", err)
-	// 	return nil, err
-	// }
-	// s.log.Infof("Deleted teacher with ID: %d", req.Id)
-
+	if req.Id == 0 {
+		return nil, errors.New("missing teacher ID forfor delete")
+	}
+	e := s.teacherUsecase.Delete(ctx, req.Id)
+	if e != nil {
+		return nil, e
+	}
 	return &pb.DeleteTeacherReply{Message: "Xoá thành công !"}, nil
 }
 
@@ -128,9 +152,12 @@ func (s *TeacherServiceService) ListTeachers(ctx context.Context, req *pb.ListTe
 	}
 
 	reply := &pb.ListTeachersReply{Teachers: teacherReplies}
-	if data, e := json.Marshal(reply); e == nil {
-		_ = s.data.RedisCache.Set(ctx, key, data, 10*time.Minute)
-	}
+
+	go func() {
+		if data, e := json.Marshal(reply); e == nil {
+			_ = s.data.RedisCache.Set(ctx, key, data, 10*time.Minute)
+		}
+	}()
 	return reply, nil
 }
 

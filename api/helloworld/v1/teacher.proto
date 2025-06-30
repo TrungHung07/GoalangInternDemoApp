@@ -25,14 +25,15 @@ message CreateTeacherRequest {
   string name = 1;
   string email = 2;
   int32 class_id = 3;
-  
+  int32 age = 4 ;
 }
 
 message UpdateTeacherRequest {
-  int64 id = 1;
-  string name = 2;
-  string email = 3;
-  int32 grade = 4;
+  optional int64 id = 1;
+  optional string name = 2;
+  optional string email = 3;
+  optional int32 age = 4;
+  optional int64 class_id = 5;
 }
 
 message DeleteTeacherRequest {

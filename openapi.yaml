@@ -143,6 +143,9 @@ components:
                 classId:
                     type: integer
                     format: int32
+                age:
+                    type: integer
+                    format: int32
             description: Request để tạo mới giáo viên
         DeleteTeacherReply:
             type: object
@@ -233,8 +236,10 @@ components:
                     type: string
                 email:
                     type: string
-                grade:
+                age:
                     type: integer
                     format: int32
+                classId:
+                    type: string
 tags:
     - name: TeacherService
