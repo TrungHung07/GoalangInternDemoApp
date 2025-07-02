@@ -1,0 +1,59 @@
+# .golangci.yml - Đặt trong root của project
+linters:
+  enable:
+    # Default linters (đã bật sẵn)
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    
+    # Thêm các linters hữu ích
+    - shadow          # Detect variable shadowing (lỗi bạn gặp)
+    - misspell        # Check typos
+    - predeclared     # Check shadowing of predeclared identifiers
+    - revive          # Replacement for golint
+    - goconst         # Find repeated strings
+    - unconvert       # Remove unnecessary type conversions
+    - gocritic        # Additional checks
+    - gosec           # Security issues
+    - bodyclose       # HTTP response body close
+    - nolintlint      # Check nolint directives
+    
+linters-settings:
+  shadow:
+    # Check shadowing in short variable declarations
+    strict: true
+    
+  misspell:
+    # Correct American English spelling
+    locale: US
+    
+  revive:
+    # Replacement for golint rules
+    rules:
+      - name: exported
+        severity: warning
+        disabled: false
+        arguments:
+          - "checkPrivateReceivers"
+          - "sayRepetitiveInsteadOfStutters"
+
+run:
+  # Timeout for analysis
+  timeout: 5m
+  
+  # Exit code when issues found
+  issues-exit-code: 1
+  
+  # Include test files
+  tests: true
+
+issues:
+  # Maximum issues count per file
+  max-issues-per-linter: 50
+  max-same-issues: 3
+  
+  # Show issues in the same order as we get them
+  sort-results: true

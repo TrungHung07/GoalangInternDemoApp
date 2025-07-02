@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	pb "DemoApp/api/helloworld/v1"
@@ -11,6 +12,7 @@ import (
 	class "DemoApp/ent/class"
 	"DemoApp/ent/teacher"
 	"DemoApp/internal/data"
+	"DemoApp/internal/utils"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v2/log"
@@ -92,7 +94,7 @@ func (s *ClassServiceService) getClassFromCache(ctx context.Context, key string)
 func (s *ClassServiceService) invalidateClassListCache(ctx context.Context) {
 	iter := s.s.Redis.Scan(ctx, 0, "class:list:*", 0).Iterator()
 	for iter.Next(ctx) {
-		_ = s.s.Redis.Del(ctx, iter.Val()).Err() 
+		_ = s.s.Redis.Del(ctx, iter.Val()).Err()
 	}
 }
 
@@ -127,8 +129,8 @@ func (s *ClassServiceService) CreateClass(ctx context.Context, req *pb.CreateCla
 	return &pb.CreateClassReply{Message: "Thêm lớp học thành công ! "}, nil
 }
 
-//UpdateClass update a existed class using the business layer 
-//It returns a UpdateClassReply containing the result for the client  
+// UpdateClass update a existed class using the business layer
+// It returns a UpdateClassReply containing the result for the client
 func (s *ClassServiceService) UpdateClass(ctx context.Context, req *pb.UpdateClassRequest) (*pb.UpdateClassReply, error) {
 	classEntity, e := s.s.DB.Class.Get(ctx, int(req.Id))
 	if e != nil {
@@ -155,7 +157,6 @@ func (s *ClassServiceService) UpdateClass(ctx context.Context, req *pb.UpdateCla
 
 	return &pb.UpdateClassReply{Message: "Cập nhật thành công !"}, nil
 }
-
 
 // DeleteClass removes a class from the database using the provided class ID.
 // It returns a DeleteClassReply indicating the result of the operation.
@@ -190,7 +191,7 @@ func applyPagination(query *ent.ClassQuery, page, pageSize int) *ent.ClassQuery 
 	return query.Offset(offset).Limit(pageSize)
 }
 
-func applyClassFilters(ctx context.Context , query *ent.ClassQuery, req *pb.ListClassRequest) *ent.ClassQuery {
+func applyClassFilters(ctx context.Context, query *ent.ClassQuery, req *pb.ListClassRequest) *ent.ClassQuery {
 	filter := req.Filter
 	if filter == nil {
 		return query
@@ -244,8 +245,8 @@ func applyClassFilters(ctx context.Context , query *ent.ClassQuery, req *pb.List
 	return query
 }
 
-// ListClass get all classes from the database which match filters ,paginations 
-// It returns a ListClassReply containing the result for the client 
+// ListClass get all classes from the database which match filters ,paginations
+// It returns a ListClassReply containing the result for the client
 func (s *ClassServiceService) ListClass(ctx context.Context, req *pb.ListClassRequest) (*pb.ListClassReply, error) {
 	// max:=int32(0); minT:=int32(0) ;
 	// if req.Filter.MaxClassStudentQuantity == nil {maxQ =0}
@@ -256,7 +257,7 @@ func (s *ClassServiceService) ListClass(ctx context.Context, req *pb.ListClassRe
 	}
 
 	query := s.s.DB.Class.Query()
-	query = applyClassFilters(ctx , query, req )
+	query = applyClassFilters(ctx, query, req)
 	total, e := query.Clone().Count(ctx)
 	if e != nil {
 		return nil, e
@@ -288,7 +289,7 @@ func (s *ClassServiceService) ListClass(ctx context.Context, req *pb.ListClassRe
 // value : string,set,.... JSON
 
 // GetClass geta class from the database with Id
-// It returns a GetClassReply containing the result for the client 
+// It returns a GetClassReply containing the result for the client
 func (s *ClassServiceService) GetClass(ctx context.Context, req *pb.GetClassRequest) (*pb.GetClassReply, error) {
 	cacheKey := s.buildCacheKey(req.Id) // lấy key
 	if reply, ok := s.getClassFromCache(ctx, cacheKey); ok {
@@ -352,4 +353,67 @@ func (s *ClassServiceService) mapStudents(students []*ent.Student) []*pb.Student
 		})
 	}
 	return result
+}
+
+func (s *ClassServiceService) ExportClassExcel(ctx context.Context, req *pb.ExportClassExcelRequest) (*pb.ExportClassExcelReply, error) {
+
+	// Fetch class data using existing logic
+	classResp, err := s.GetClass(ctx, &pb.GetClassRequest{Id: req.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get class: %w", err)
+	}
+
+	class := classResp.Class
+	students := classResp.Students
+	teachers := classResp.Teachers
+	// Prepare basic info
+	basicInfo := map[string]interface{}{
+		"Class ID":          class.Id,
+		"Class Name":        class.Name,
+		"Grade":             class.Grade,
+		"Students Quantity": classResp.StudentsQuantity,
+		"Teachers Quantity": classResp.TeachersQuantity,
+	}
+
+	// Prepare student section
+	studentSection := utils.ExcelSection{
+		Title:   "List of Students :",
+		Headers: []string{"Students Name :"},
+	}
+	for _, s := range students {
+		studentSection.Data = append(studentSection.Data, map[string]string{
+			"Students Name :": s.Name,
+		})
+	}
+
+	// Prepare teacher section
+	teacherSection := utils.ExcelSection{
+		Title:   "List of Teachers :",
+		Headers: []string{"Teachers Name :"},
+	}
+	for _, t := range teachers {
+		teacherSection.Data = append(teacherSection.Data, map[string]string{
+			"Teachers Name :": t.Name,
+		})
+	}
+
+	// Prepare report data
+	reportData := &utils.ExcelReportData{
+		Title:     fmt.Sprintf("Class Report - %s", strings.ToUpper(class.Name)),
+		SheetName: "Class Summary",
+		BasicInfo: basicInfo,
+		Sections:  []utils.ExcelSection{studentSection, teacherSection},
+	}
+
+	// Generate Excel file bytes
+	helper := utils.NewExcelHelper()
+
+	resultFile, err := helper.ExportReport(reportData)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.ExportClassExcelReply{
+		File: resultFile,
+	}, nil
 }

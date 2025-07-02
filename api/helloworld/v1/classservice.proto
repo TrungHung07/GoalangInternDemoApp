@@ -1,7 +1,10 @@
 syntax = "proto3";
 package helloworld.v1;
 
-// import public "google/api/annotations.proto";
+import public "google/api/annotations.proto";
+
+//kratos proto client ./api/helloworld/v1/classservice.proto
+//kratos proto server ./api/helloworld/v1/classservice.proto
 import public "api/helloworld/v1/class.proto";
 
 option go_package = "DemoApp/api/helloworld/v1;v1";
@@ -9,40 +12,47 @@ option go_package = "DemoApp/api/helloworld/v1;v1";
 service ClassService {
     // Tạo mới lớp học
     rpc CreateClass(CreateClassRequest) returns (CreateClassReply){
-        // option (google.api.http) = {
-        //     post : "/v1/class",
-        //     body : "*"
-        // };
+        option (google.api.http) = {
+            post : "/v1/class",
+            body : "*"
+        };
     }
 
     // Cập nhật thông tin lớp học
     rpc UpdateClass(UpdateClassRequest) returns (UpdateClassReply) {
-        // option (google.api.http) = {
-        //     put : "/v1/class",
-        //     body : "*"
-        // };
+        option (google.api.http) = {
+            put : "/v1/class",
+            body : "*"
+        };
     }
 
     // Xóa lớp học
     rpc DeleteClass(DeleteClassRequest) returns (DeleteClassReply){
-        // option (google.api.http) = {
-        //     put : "/v1/class/delete",
-        //     body : "*"
-        // };
+        option (google.api.http) = {
+            put : "/v1/class/delete",
+            body : "*"
+        };
     }
 
     // Lấy danh sách lớp học
     rpc ListClass(ListClassRequest) returns (ListClassReply){
-        // option (google.api.http) = {
-        //     post : "/v1/class/list",
-        //     body : "*"
-        // };
+        option (google.api.http) = {
+            post : "/v1/class/list",
+            body : "*"
+        };
     }
 
     // Lấy thông tin chi tiết của một lớp học
     rpc GetClass(GetClassRequest) returns (GetClassReply) {
-        // option (google.api.http) = {
-        //     get : "/v1/class/{id}",
-        // };
+        option (google.api.http) = {
+            get : "/v1/class/{id}",
+        };
+    }
+
+   
+    rpc ExportClassExcel(ExportClassExcelRequest) returns (ExportClassExcelReply){
+        option (google.api.http) = {
+            get : "/v1/class/export/{id}",
+        };
     }
 }

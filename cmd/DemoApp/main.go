@@ -15,7 +15,8 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/joho/godotenv"
-	_ "github.com/joho/godotenv"
+
+	// _ "github.com/joho/godotenv"
 	_ "go.uber.org/automaxprocs"
 )
 

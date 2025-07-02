@@ -24,6 +24,14 @@ message ListClassRequest {
     optional ClassFilterRequest filter =3 ; 
 }
 
+message ExportClassExcelRequest {
+    int64 id = 1;
+}
+
+message ExportClassExcelReply {
+  bytes file = 1;
+}
+
 message ClassFilterRequest {
     optional string name = 3; // Tên lớp học để lọc
     optional bool is_deleted = 5; // Lọc theo trạng thái xóa

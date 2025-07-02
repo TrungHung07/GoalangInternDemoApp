@@ -7,7 +7,8 @@
 package v1
 
 import (
-	_ "google.golang.org/genproto/googleapis/api/annotations"
+	annotations "google.golang.org/genproto/googleapis/api/annotations"
+	_ "google.golang.org/genproto/googleapis/api/httpbody"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -21,46 +22,55 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Symbols defined in public import of google/api/annotations.proto.
+
+var E_Http = annotations.E_Http
+
 var File_api_helloworld_v1_classservice_proto protoreflect.FileDescriptor
 
 const file_api_helloworld_v1_classservice_proto_rawDesc = "" +
 	"\n" +
-	"$api/helloworld/v1/classservice.proto\x12\rhelloworld.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1dapi/helloworld/v1/class.proto2\x9a\x04\n" +
+	"$api/helloworld/v1/classservice.proto\x12\rhelloworld.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x19google/api/httpbody.proto\x1a\x1dapi/helloworld/v1/class.proto2\x9b\x05\n" +
 	"\fClassService\x12g\n" +
 	"\vCreateClass\x12!.helloworld.v1.CreateClassRequest\x1a\x1f.helloworld.v1.CreateClassReply\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/class\x12g\n" +
 	"\vUpdateClass\x12!.helloworld.v1.UpdateClassRequest\x1a\x1f.helloworld.v1.UpdateClassReply\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\x1a\t/v1/class\x12n\n" +
 	"\vDeleteClass\x12!.helloworld.v1.DeleteClassRequest\x1a\x1f.helloworld.v1.DeleteClassReply\"\x1b\x82\xd3\xe4\x93\x02\x15:\x01*\x1a\x10/v1/class/delete\x12f\n" +
 	"\tListClass\x12\x1f.helloworld.v1.ListClassRequest\x1a\x1d.helloworld.v1.ListClassReply\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/class/list\x12`\n" +
-	"\bGetClass\x12\x1e.helloworld.v1.GetClassRequest\x1a\x1c.helloworld.v1.GetClassReply\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/class/{id}B\x1eZ\x1cDemoApp/api/helloworld/v1;v1P\x01b\x06proto3"
+	"\bGetClass\x12\x1e.helloworld.v1.GetClassRequest\x1a\x1c.helloworld.v1.GetClassReply\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/class/{id}\x12\x7f\n" +
+	"\x10ExportClassExcel\x12&.helloworld.v1.ExportClassExcelRequest\x1a$.helloworld.v1.ExportClassExcelReply\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/v1/class/export/{id}B\x1eZ\x1cDemoApp/api/helloworld/v1;v1P\x00P\x02b\x06proto3"
 
 var file_api_helloworld_v1_classservice_proto_goTypes = []any{
-	(*CreateClassRequest)(nil), // 0: helloworld.v1.CreateClassRequest
-	(*UpdateClassRequest)(nil), // 1: helloworld.v1.UpdateClassRequest
-	(*DeleteClassRequest)(nil), // 2: helloworld.v1.DeleteClassRequest
-	(*ListClassRequest)(nil),   // 3: helloworld.v1.ListClassRequest
-	(*GetClassRequest)(nil),    // 4: helloworld.v1.GetClassRequest
-	(*CreateClassReply)(nil),   // 5: helloworld.v1.CreateClassReply
-	(*UpdateClassReply)(nil),   // 6: helloworld.v1.UpdateClassReply
-	(*DeleteClassReply)(nil),   // 7: helloworld.v1.DeleteClassReply
-	(*ListClassReply)(nil),     // 8: helloworld.v1.ListClassReply
-	(*GetClassReply)(nil),      // 9: helloworld.v1.GetClassReply
+	(*CreateClassRequest)(nil),      // 0: helloworld.v1.CreateClassRequest
+	(*UpdateClassRequest)(nil),      // 1: helloworld.v1.UpdateClassRequest
+	(*DeleteClassRequest)(nil),      // 2: helloworld.v1.DeleteClassRequest
+	(*ListClassRequest)(nil),        // 3: helloworld.v1.ListClassRequest
+	(*GetClassRequest)(nil),         // 4: helloworld.v1.GetClassRequest
+	(*ExportClassExcelRequest)(nil), // 5: helloworld.v1.ExportClassExcelRequest
+	(*CreateClassReply)(nil),        // 6: helloworld.v1.CreateClassReply
+	(*UpdateClassReply)(nil),        // 7: helloworld.v1.UpdateClassReply
+	(*DeleteClassReply)(nil),        // 8: helloworld.v1.DeleteClassReply
+	(*ListClassReply)(nil),          // 9: helloworld.v1.ListClassReply
+	(*GetClassReply)(nil),           // 10: helloworld.v1.GetClassReply
+	(*ExportClassExcelReply)(nil),   // 11: helloworld.v1.ExportClassExcelReply
 }
 var file_api_helloworld_v1_classservice_proto_depIdxs = []int32{
-	0, // 0: helloworld.v1.ClassService.CreateClass:input_type -> helloworld.v1.CreateClassRequest
-	1, // 1: helloworld.v1.ClassService.UpdateClass:input_type -> helloworld.v1.UpdateClassRequest
-	2, // 2: helloworld.v1.ClassService.DeleteClass:input_type -> helloworld.v1.DeleteClassRequest
-	3, // 3: helloworld.v1.ClassService.ListClass:input_type -> helloworld.v1.ListClassRequest
-	4, // 4: helloworld.v1.ClassService.GetClass:input_type -> helloworld.v1.GetClassRequest
-	5, // 5: helloworld.v1.ClassService.CreateClass:output_type -> helloworld.v1.CreateClassReply
-	6, // 6: helloworld.v1.ClassService.UpdateClass:output_type -> helloworld.v1.UpdateClassReply
-	7, // 7: helloworld.v1.ClassService.DeleteClass:output_type -> helloworld.v1.DeleteClassReply
-	8, // 8: helloworld.v1.ClassService.ListClass:output_type -> helloworld.v1.ListClassReply
-	9, // 9: helloworld.v1.ClassService.GetClass:output_type -> helloworld.v1.GetClassReply
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: helloworld.v1.ClassService.CreateClass:input_type -> helloworld.v1.CreateClassRequest
+	1,  // 1: helloworld.v1.ClassService.UpdateClass:input_type -> helloworld.v1.UpdateClassRequest
+	2,  // 2: helloworld.v1.ClassService.DeleteClass:input_type -> helloworld.v1.DeleteClassRequest
+	3,  // 3: helloworld.v1.ClassService.ListClass:input_type -> helloworld.v1.ListClassRequest
+	4,  // 4: helloworld.v1.ClassService.GetClass:input_type -> helloworld.v1.GetClassRequest
+	5,  // 5: helloworld.v1.ClassService.ExportClassExcel:input_type -> helloworld.v1.ExportClassExcelRequest
+	6,  // 6: helloworld.v1.ClassService.CreateClass:output_type -> helloworld.v1.CreateClassReply
+	7,  // 7: helloworld.v1.ClassService.UpdateClass:output_type -> helloworld.v1.UpdateClassReply
+	8,  // 8: helloworld.v1.ClassService.DeleteClass:output_type -> helloworld.v1.DeleteClassReply
+	9,  // 9: helloworld.v1.ClassService.ListClass:output_type -> helloworld.v1.ListClassReply
+	10, // 10: helloworld.v1.ClassService.GetClass:output_type -> helloworld.v1.GetClassReply
+	11, // 11: helloworld.v1.ClassService.ExportClassExcel:output_type -> helloworld.v1.ExportClassExcelReply
+	6,  // [6:12] is the sub-list for method output_type
+	0,  // [0:6] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_api_helloworld_v1_classservice_proto_init() }

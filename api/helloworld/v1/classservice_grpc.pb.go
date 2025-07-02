@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ClassService_CreateClass_FullMethodName = "/helloworld.v1.ClassService/CreateClass"
-	ClassService_UpdateClass_FullMethodName = "/helloworld.v1.ClassService/UpdateClass"
-	ClassService_DeleteClass_FullMethodName = "/helloworld.v1.ClassService/DeleteClass"
-	ClassService_ListClass_FullMethodName   = "/helloworld.v1.ClassService/ListClass"
-	ClassService_GetClass_FullMethodName    = "/helloworld.v1.ClassService/GetClass"
+	ClassService_CreateClass_FullMethodName      = "/helloworld.v1.ClassService/CreateClass"
+	ClassService_UpdateClass_FullMethodName      = "/helloworld.v1.ClassService/UpdateClass"
+	ClassService_DeleteClass_FullMethodName      = "/helloworld.v1.ClassService/DeleteClass"
+	ClassService_ListClass_FullMethodName        = "/helloworld.v1.ClassService/ListClass"
+	ClassService_GetClass_FullMethodName         = "/helloworld.v1.ClassService/GetClass"
+	ClassService_ExportClassExcel_FullMethodName = "/helloworld.v1.ClassService/ExportClassExcel"
 )
 
 // ClassServiceClient is the client API for ClassService service.
@@ -40,6 +41,7 @@ type ClassServiceClient interface {
 	ListClass(ctx context.Context, in *ListClassRequest, opts ...grpc.CallOption) (*ListClassReply, error)
 	// Lấy thông tin chi tiết của một lớp học
 	GetClass(ctx context.Context, in *GetClassRequest, opts ...grpc.CallOption) (*GetClassReply, error)
+	ExportClassExcel(ctx context.Context, in *ExportClassExcelRequest, opts ...grpc.CallOption) (*ExportClassExcelReply, error)
 }
 
 type classServiceClient struct {
@@ -100,6 +102,16 @@ func (c *classServiceClient) GetClass(ctx context.Context, in *GetClassRequest, 
 	return out, nil
 }
 
+func (c *classServiceClient) ExportClassExcel(ctx context.Context, in *ExportClassExcelRequest, opts ...grpc.CallOption) (*ExportClassExcelReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExportClassExcelReply)
+	err := c.cc.Invoke(ctx, ClassService_ExportClassExcel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ClassServiceServer is the server API for ClassService service.
 // All implementations must embed UnimplementedClassServiceServer
 // for forward compatibility.
@@ -114,6 +126,7 @@ type ClassServiceServer interface {
 	ListClass(context.Context, *ListClassRequest) (*ListClassReply, error)
 	// Lấy thông tin chi tiết của một lớp học
 	GetClass(context.Context, *GetClassRequest) (*GetClassReply, error)
+	ExportClassExcel(context.Context, *ExportClassExcelRequest) (*ExportClassExcelReply, error)
 	mustEmbedUnimplementedClassServiceServer()
 }
 
@@ -138,6 +151,9 @@ func (UnimplementedClassServiceServer) ListClass(context.Context, *ListClassRequ
 }
 func (UnimplementedClassServiceServer) GetClass(context.Context, *GetClassRequest) (*GetClassReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetClass not implemented")
+}
+func (UnimplementedClassServiceServer) ExportClassExcel(context.Context, *ExportClassExcelRequest) (*ExportClassExcelReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExportClassExcel not implemented")
 }
 func (UnimplementedClassServiceServer) mustEmbedUnimplementedClassServiceServer() {}
 func (UnimplementedClassServiceServer) testEmbeddedByValue()                      {}
@@ -250,6 +266,24 @@ func _ClassService_GetClass_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ClassService_ExportClassExcel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExportClassExcelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClassServiceServer).ExportClassExcel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ClassService_ExportClassExcel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClassServiceServer).ExportClassExcel(ctx, req.(*ExportClassExcelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ClassService_ServiceDesc is the grpc.ServiceDesc for ClassService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -276,6 +310,10 @@ var ClassService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetClass",
 			Handler:    _ClassService_GetClass_Handler,
+		},
+		{
+			MethodName: "ExportClassExcel",
+			Handler:    _ClassService_ExportClassExcel_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

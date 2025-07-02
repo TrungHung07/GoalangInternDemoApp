@@ -3,7 +3,7 @@ package service
 import (
 	pb "DemoApp/api/helloworld/v1"
 	"DemoApp/ent"
-	"DemoApp/ent/student"
+	student "DemoApp/ent/student"
 	"DemoApp/internal/data"
 	"encoding/json"
 	"fmt"
@@ -19,7 +19,7 @@ type StudentServiceService struct {
 	pb.UnimplementedStudentServiceServer
 	data          *data.Data
 	log           *log.Helper
-	hisotryHelper *data.HistoryHelper
+	historyHelper *data.HistoryHelper
 }
 
 // NewStudentServiceService creates a new instance of StudentServiceService with the given data layer, logger, and history helper.
@@ -27,10 +27,9 @@ func NewStudentServiceService(data *data.Data, logger log.Logger, helper *data.H
 	return &StudentServiceService{
 		data:          data,
 		log:           log.NewHelper(logger),
-		hisotryHelper: helper,
+		historyHelper: helper,
 	}
 }
-
 
 func studentPagination(query *ent.StudentQuery, page, pageSize int) *ent.StudentQuery {
 	if page <= 0 {
@@ -76,7 +75,7 @@ func (s *StudentServiceService) CreateStudent(ctx context.Context, req *pb.Creat
 		s.log.Error("Failed to create student:", err)
 		return nil, err
 	}
-	_ = s.hisotryHelper.TrackInsert(ctx,
+	_ = s.historyHelper.TrackInsert(ctx,
 		"student",
 		fmt.Sprint(savedStudent.ID),
 		savedStudent,
@@ -86,8 +85,8 @@ func (s *StudentServiceService) CreateStudent(ctx context.Context, req *pb.Creat
 	return &pb.CreateStudentReply{Message: "Thêm thành công 1 học sinh mới "}, nil
 }
 
-//UpdateStudent update a existed student using the business layer 
-//It returns a UpdateStudentReply containing the result for the client 
+// UpdateStudent update a existed student using the business layer
+// It returns a UpdateStudentReply containing the result for the client
 func (s *StudentServiceService) UpdateStudent(ctx context.Context, req *pb.UpdateStudentRequest) (*pb.UpdateStudentReply, error) {
 
 	studentEntity, err := s.data.DB.Student.Get(ctx, int(req.Id))
@@ -129,8 +128,8 @@ func (s *StudentServiceService) DeleteStudent(ctx context.Context, req *pb.Delet
 	return &pb.DeleteStudentReply{Message: "Xóa thành công học sinh này !"}, nil
 }
 
-// ListStudent get all students from the database which match filters ,paginations 
-// It returns a ListStudentsReply containing the result for the client 
+// ListStudent get all students from the database which match filters ,paginations
+// It returns a ListStudentsReply containing the result for the client
 func (s *StudentServiceService) ListStudent(ctx context.Context, req *pb.ListStudentRequest) (*pb.ListStudentReply, error) {
 
 	cacheKey := fmt.Sprintf("student:list:%d:%d", req.Page, req.PageSize)
@@ -160,17 +159,17 @@ func (s *StudentServiceService) ListStudent(ctx context.Context, req *pb.ListStu
 
 	var items []*pb.StudentData
 
-	for _, student := range students {
+	for _, item := range students {
 		className := ""
-		if student.Edges.Classes != nil {
-			className = student.Edges.Classes.Name
+		if item.Edges.Classes != nil {
+			className = item.Edges.Classes.Name
 		}
 		items = append(items, &pb.StudentData{
-			Id:        int64(student.ID),
-			Name:      student.Name,
-			ClassId:   int64(student.ClassID),
+			Id:        int64(item.ID),
+			Name:      item.Name,
+			ClassId:   int64(item.ClassID),
 			ClassName: className,
-			IsDeleted: &student.IsDeleted,
+			IsDeleted: &item.IsDeleted,
 		})
 	}
 	reply := &pb.ListStudentReply{
@@ -186,7 +185,7 @@ func (s *StudentServiceService) ListStudent(ctx context.Context, req *pb.ListStu
 }
 
 // GetStudent get a existed student from the database with provided Id
-// It returns a GetStuddentReplyy containing the result for the client 
+// It returns a GetStuddentReplyy containing the result for the client
 func (s *StudentServiceService) GetStudent(ctx context.Context, req *pb.GetStudentRequest) (*pb.GetStudentReply, error) {
 
 	cacheKey := fmt.Sprintf("student:%d", req.Id)

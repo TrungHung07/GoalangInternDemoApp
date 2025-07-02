@@ -238,20 +238,108 @@ func (x *ListClassRequest) GetFilter() *ClassFilterRequest {
 	return nil
 }
 
+type ExportClassExcelRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExportClassExcelRequest) Reset() {
+	*x = ExportClassExcelRequest{}
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExportClassExcelRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExportClassExcelRequest) ProtoMessage() {}
+
+func (x *ExportClassExcelRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExportClassExcelRequest.ProtoReflect.Descriptor instead.
+func (*ExportClassExcelRequest) Descriptor() ([]byte, []int) {
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ExportClassExcelRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type ExportClassExcelReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	File          []byte                 `protobuf:"bytes,1,opt,name=file,proto3" json:"file,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExportClassExcelReply) Reset() {
+	*x = ExportClassExcelReply{}
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExportClassExcelReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExportClassExcelReply) ProtoMessage() {}
+
+func (x *ExportClassExcelReply) ProtoReflect() protoreflect.Message {
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExportClassExcelReply.ProtoReflect.Descriptor instead.
+func (*ExportClassExcelReply) Descriptor() ([]byte, []int) {
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ExportClassExcelReply) GetFile() []byte {
+	if x != nil {
+		return x.File
+	}
+	return nil
+}
+
 type ClassFilterRequest struct {
 	state                   protoimpl.MessageState `protogen:"open.v1"`
-	Name                    *string                `protobuf:"bytes,3,opt,name=name,proto3,oneof" json:"name,omitempty"`                             // Tên lớp học để lọc
-	IsDeleted               *bool                  `protobuf:"varint,5,opt,name=is_deleted,json=isDeleted,proto3,oneof" json:"is_deleted,omitempty"` // Lọc theo trạng thái xóa
-	Keyword                 *string                `protobuf:"bytes,6,opt,name=keyword,proto3,oneof" json:"keyword,omitempty"`                       // Từ khóa tìm kiếm
-	MinClassTeacher         *int32                 `protobuf:"varint,7,opt,name=minClassTeacher,proto3,oneof" json:"minClassTeacher,omitempty"`
-	MaxClassStudentQuantity *int32                 `protobuf:"varint,8,opt,name=maxClassStudentQuantity,proto3,oneof" json:"maxClassStudentQuantity,omitempty"`
+	Name                    *string                `protobuf:"bytes,3,opt,name=name,proto3,oneof" json:"name,omitempty"`                                        // Tên lớp học để lọc
+	IsDeleted               *bool                  `protobuf:"varint,5,opt,name=is_deleted,json=isDeleted,proto3,oneof" json:"is_deleted,omitempty"`            // Lọc theo trạng thái xóa
+	Keyword                 *string                `protobuf:"bytes,6,opt,name=keyword,proto3,oneof" json:"keyword,omitempty"`                                  // Từ khóa tìm kiếm
+	MinClassTeacher         *int32                 `protobuf:"varint,7,opt,name=minClassTeacher,proto3,oneof" json:"minClassTeacher,omitempty"`                 // độ tuổi của giáo viên tối thiểu
+	MaxClassStudentQuantity *int32                 `protobuf:"varint,8,opt,name=maxClassStudentQuantity,proto3,oneof" json:"maxClassStudentQuantity,omitempty"` // sĩ số học sinh tối đa
 	unknownFields           protoimpl.UnknownFields
 	sizeCache               protoimpl.SizeCache
 }
 
 func (x *ClassFilterRequest) Reset() {
 	*x = ClassFilterRequest{}
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[4]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -263,7 +351,7 @@ func (x *ClassFilterRequest) String() string {
 func (*ClassFilterRequest) ProtoMessage() {}
 
 func (x *ClassFilterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[4]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -276,7 +364,7 @@ func (x *ClassFilterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClassFilterRequest.ProtoReflect.Descriptor instead.
 func (*ClassFilterRequest) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{4}
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ClassFilterRequest) GetName() string {
@@ -323,7 +411,7 @@ type GetClassRequest struct {
 
 func (x *GetClassRequest) Reset() {
 	*x = GetClassRequest{}
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[5]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -335,7 +423,7 @@ func (x *GetClassRequest) String() string {
 func (*GetClassRequest) ProtoMessage() {}
 
 func (x *GetClassRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[5]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -348,7 +436,7 @@ func (x *GetClassRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetClassRequest.ProtoReflect.Descriptor instead.
 func (*GetClassRequest) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{5}
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetClassRequest) GetId() int64 {
@@ -368,7 +456,7 @@ type ListClassReply struct {
 
 func (x *ListClassReply) Reset() {
 	*x = ListClassReply{}
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[6]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -380,7 +468,7 @@ func (x *ListClassReply) String() string {
 func (*ListClassReply) ProtoMessage() {}
 
 func (x *ListClassReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[6]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -393,7 +481,7 @@ func (x *ListClassReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListClassReply.ProtoReflect.Descriptor instead.
 func (*ListClassReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{6}
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListClassReply) GetItems() []*ClassData {
@@ -419,7 +507,7 @@ type StudentDataForClass struct {
 
 func (x *StudentDataForClass) Reset() {
 	*x = StudentDataForClass{}
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[7]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -431,7 +519,7 @@ func (x *StudentDataForClass) String() string {
 func (*StudentDataForClass) ProtoMessage() {}
 
 func (x *StudentDataForClass) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[7]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -444,7 +532,7 @@ func (x *StudentDataForClass) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StudentDataForClass.ProtoReflect.Descriptor instead.
 func (*StudentDataForClass) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{7}
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *StudentDataForClass) GetName() string {
@@ -463,7 +551,7 @@ type TeacherDataForClass struct {
 
 func (x *TeacherDataForClass) Reset() {
 	*x = TeacherDataForClass{}
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[8]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -475,7 +563,7 @@ func (x *TeacherDataForClass) String() string {
 func (*TeacherDataForClass) ProtoMessage() {}
 
 func (x *TeacherDataForClass) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[8]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -488,7 +576,7 @@ func (x *TeacherDataForClass) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TeacherDataForClass.ProtoReflect.Descriptor instead.
 func (*TeacherDataForClass) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{8}
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *TeacherDataForClass) GetName() string {
@@ -511,7 +599,7 @@ type GetClassReply struct {
 
 func (x *GetClassReply) Reset() {
 	*x = GetClassReply{}
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[9]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -523,7 +611,7 @@ func (x *GetClassReply) String() string {
 func (*GetClassReply) ProtoMessage() {}
 
 func (x *GetClassReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[9]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -536,7 +624,7 @@ func (x *GetClassReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetClassReply.ProtoReflect.Descriptor instead.
 func (*GetClassReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{9}
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GetClassReply) GetClass() *ClassData {
@@ -583,7 +671,7 @@ type CreateClassReply struct {
 
 func (x *CreateClassReply) Reset() {
 	*x = CreateClassReply{}
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[10]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -595,7 +683,7 @@ func (x *CreateClassReply) String() string {
 func (*CreateClassReply) ProtoMessage() {}
 
 func (x *CreateClassReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[10]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -608,7 +696,7 @@ func (x *CreateClassReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateClassReply.ProtoReflect.Descriptor instead.
 func (*CreateClassReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{10}
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CreateClassReply) GetMessage() string {
@@ -627,7 +715,7 @@ type UpdateClassReply struct {
 
 func (x *UpdateClassReply) Reset() {
 	*x = UpdateClassReply{}
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[11]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -639,7 +727,7 @@ func (x *UpdateClassReply) String() string {
 func (*UpdateClassReply) ProtoMessage() {}
 
 func (x *UpdateClassReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[11]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -652,7 +740,7 @@ func (x *UpdateClassReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateClassReply.ProtoReflect.Descriptor instead.
 func (*UpdateClassReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{11}
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *UpdateClassReply) GetMessage() string {
@@ -671,7 +759,7 @@ type DeleteClassReply struct {
 
 func (x *DeleteClassReply) Reset() {
 	*x = DeleteClassReply{}
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[12]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -683,7 +771,7 @@ func (x *DeleteClassReply) String() string {
 func (*DeleteClassReply) ProtoMessage() {}
 
 func (x *DeleteClassReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[12]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -696,7 +784,7 @@ func (x *DeleteClassReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteClassReply.ProtoReflect.Descriptor instead.
 func (*DeleteClassReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{12}
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *DeleteClassReply) GetMessage() string {
@@ -718,7 +806,7 @@ type ClassData struct {
 
 func (x *ClassData) Reset() {
 	*x = ClassData{}
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[13]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -730,7 +818,7 @@ func (x *ClassData) String() string {
 func (*ClassData) ProtoMessage() {}
 
 func (x *ClassData) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_class_proto_msgTypes[13]
+	mi := &file_api_helloworld_v1_class_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -743,7 +831,7 @@ func (x *ClassData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClassData.ProtoReflect.Descriptor instead.
 func (*ClassData) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{13}
+	return file_api_helloworld_v1_class_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ClassData) GetId() int64 {
@@ -792,7 +880,11 @@ const file_api_helloworld_v1_class_proto_rawDesc = "" +
 	"\x04page\x18\x01 \x01(\rR\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\rR\bpageSize\x12>\n" +
 	"\x06filter\x18\x03 \x01(\v2!.helloworld.v1.ClassFilterRequestH\x00R\x06filter\x88\x01\x01B\t\n" +
-	"\a_filter\"\xb2\x02\n" +
+	"\a_filter\")\n" +
+	"\x17ExportClassExcelRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"+\n" +
+	"\x15ExportClassExcelReply\x12\x12\n" +
+	"\x04file\x18\x01 \x01(\fR\x04file\"\xb2\x02\n" +
 	"\x12ClassFilterRequest\x12\x17\n" +
 	"\x04name\x18\x03 \x01(\tH\x00R\x04name\x88\x01\x01\x12\"\n" +
 	"\n" +
@@ -848,29 +940,31 @@ func file_api_helloworld_v1_class_proto_rawDescGZIP() []byte {
 	return file_api_helloworld_v1_class_proto_rawDescData
 }
 
-var file_api_helloworld_v1_class_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_api_helloworld_v1_class_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_api_helloworld_v1_class_proto_goTypes = []any{
-	(*CreateClassRequest)(nil),  // 0: helloworld.v1.CreateClassRequest
-	(*UpdateClassRequest)(nil),  // 1: helloworld.v1.UpdateClassRequest
-	(*DeleteClassRequest)(nil),  // 2: helloworld.v1.DeleteClassRequest
-	(*ListClassRequest)(nil),    // 3: helloworld.v1.ListClassRequest
-	(*ClassFilterRequest)(nil),  // 4: helloworld.v1.ClassFilterRequest
-	(*GetClassRequest)(nil),     // 5: helloworld.v1.GetClassRequest
-	(*ListClassReply)(nil),      // 6: helloworld.v1.ListClassReply
-	(*StudentDataForClass)(nil), // 7: helloworld.v1.StudentDataForClass
-	(*TeacherDataForClass)(nil), // 8: helloworld.v1.TeacherDataForClass
-	(*GetClassReply)(nil),       // 9: helloworld.v1.GetClassReply
-	(*CreateClassReply)(nil),    // 10: helloworld.v1.CreateClassReply
-	(*UpdateClassReply)(nil),    // 11: helloworld.v1.UpdateClassReply
-	(*DeleteClassReply)(nil),    // 12: helloworld.v1.DeleteClassReply
-	(*ClassData)(nil),           // 13: helloworld.v1.ClassData
+	(*CreateClassRequest)(nil),      // 0: helloworld.v1.CreateClassRequest
+	(*UpdateClassRequest)(nil),      // 1: helloworld.v1.UpdateClassRequest
+	(*DeleteClassRequest)(nil),      // 2: helloworld.v1.DeleteClassRequest
+	(*ListClassRequest)(nil),        // 3: helloworld.v1.ListClassRequest
+	(*ExportClassExcelRequest)(nil), // 4: helloworld.v1.ExportClassExcelRequest
+	(*ExportClassExcelReply)(nil),   // 5: helloworld.v1.ExportClassExcelReply
+	(*ClassFilterRequest)(nil),      // 6: helloworld.v1.ClassFilterRequest
+	(*GetClassRequest)(nil),         // 7: helloworld.v1.GetClassRequest
+	(*ListClassReply)(nil),          // 8: helloworld.v1.ListClassReply
+	(*StudentDataForClass)(nil),     // 9: helloworld.v1.StudentDataForClass
+	(*TeacherDataForClass)(nil),     // 10: helloworld.v1.TeacherDataForClass
+	(*GetClassReply)(nil),           // 11: helloworld.v1.GetClassReply
+	(*CreateClassReply)(nil),        // 12: helloworld.v1.CreateClassReply
+	(*UpdateClassReply)(nil),        // 13: helloworld.v1.UpdateClassReply
+	(*DeleteClassReply)(nil),        // 14: helloworld.v1.DeleteClassReply
+	(*ClassData)(nil),               // 15: helloworld.v1.ClassData
 }
 var file_api_helloworld_v1_class_proto_depIdxs = []int32{
-	4,  // 0: helloworld.v1.ListClassRequest.filter:type_name -> helloworld.v1.ClassFilterRequest
-	13, // 1: helloworld.v1.ListClassReply.items:type_name -> helloworld.v1.ClassData
-	13, // 2: helloworld.v1.GetClassReply.class:type_name -> helloworld.v1.ClassData
-	7,  // 3: helloworld.v1.GetClassReply.students:type_name -> helloworld.v1.StudentDataForClass
-	8,  // 4: helloworld.v1.GetClassReply.teachers:type_name -> helloworld.v1.TeacherDataForClass
+	6,  // 0: helloworld.v1.ListClassRequest.filter:type_name -> helloworld.v1.ClassFilterRequest
+	15, // 1: helloworld.v1.ListClassReply.items:type_name -> helloworld.v1.ClassData
+	15, // 2: helloworld.v1.GetClassReply.class:type_name -> helloworld.v1.ClassData
+	9,  // 3: helloworld.v1.GetClassReply.students:type_name -> helloworld.v1.StudentDataForClass
+	10, // 4: helloworld.v1.GetClassReply.teachers:type_name -> helloworld.v1.TeacherDataForClass
 	5,  // [5:5] is the sub-list for method output_type
 	5,  // [5:5] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
@@ -884,15 +978,15 @@ func file_api_helloworld_v1_class_proto_init() {
 		return
 	}
 	file_api_helloworld_v1_class_proto_msgTypes[3].OneofWrappers = []any{}
-	file_api_helloworld_v1_class_proto_msgTypes[4].OneofWrappers = []any{}
-	file_api_helloworld_v1_class_proto_msgTypes[13].OneofWrappers = []any{}
+	file_api_helloworld_v1_class_proto_msgTypes[6].OneofWrappers = []any{}
+	file_api_helloworld_v1_class_proto_msgTypes[15].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_helloworld_v1_class_proto_rawDesc), len(file_api_helloworld_v1_class_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

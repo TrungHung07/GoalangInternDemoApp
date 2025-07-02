@@ -3,20 +3,20 @@
 
 openapi: 3.0.3
 info:
-    title: TeacherService API
-    description: gRPC Service định nghĩa các hàm cho Teacher
+    title: ClassService API
     version: 0.0.1
 paths:
-    api/v1/teacher:
+    /v1/class:
         put:
             tags:
-                - TeacherService
-            operationId: TeacherService_UpdateTeacher
+                - ClassService
+            description: Cập nhật thông tin lớp học
+            operationId: ClassService_UpdateClass
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/UpdateTeacherRequest'
+                            $ref: '#/components/schemas/UpdateClassRequest'
                 required: true
             responses:
                 "200":
@@ -24,7 +24,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/UpdateTeacherReply'
+                                $ref: '#/components/schemas/UpdateClassReply'
                 default:
                     description: Default error response
                     content:
@@ -33,13 +33,14 @@ paths:
                                 $ref: '#/components/schemas/Status'
         post:
             tags:
-                - TeacherService
-            operationId: TeacherService_CreateTeacher
+                - ClassService
+            description: Tạo mới lớp học
+            operationId: ClassService_CreateClass
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CreateTeacherRequest'
+                            $ref: '#/components/schemas/CreateClassRequest'
                 required: true
             responses:
                 "200":
@@ -47,23 +48,24 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/CreateTeacherReply'
+                                $ref: '#/components/schemas/CreateClassReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    api/v1/teacher/list:
-        post:
+    /v1/class/delete:
+        put:
             tags:
-                - TeacherService
-            operationId: TeacherService_ListTeachers
+                - ClassService
+            description: Xóa lớp học
+            operationId: ClassService_DeleteClass
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/ListTeachersRequest'
+                            $ref: '#/components/schemas/DeleteClassRequest'
                 required: true
             responses:
                 "200":
@@ -71,18 +73,18 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ListTeachersReply'
+                                $ref: '#/components/schemas/DeleteClassReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    api/v1/teacher/{id}:
+    /v1/class/export/{id}:
         get:
             tags:
-                - TeacherService
-            operationId: TeacherService_GetTeacher
+                - ClassService
+            operationId: ClassService_ExportClassExcel
             parameters:
                 - name: id
                   in: path
@@ -95,17 +97,44 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/TeacherReply'
+                                $ref: '#/components/schemas/ExportClassExcelReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-        delete:
+    /v1/class/list:
+        post:
             tags:
-                - TeacherService
-            operationId: TeacherService_DeleteTeacher
+                - ClassService
+            description: Lấy danh sách lớp học
+            operationId: ClassService_ListClass
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ListClassRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListClassReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/class/{id}:
+        get:
+            tags:
+                - ClassService
+            description: Lấy thông tin chi tiết của một lớp học
+            operationId: ClassService_GetClass
             parameters:
                 - name: id
                   in: path
@@ -118,7 +147,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/DeleteTeacherReply'
+                                $ref: '#/components/schemas/GetClassReply'
                 default:
                     description: Default error response
                     content:
@@ -127,42 +156,80 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
-        CreateTeacherReply:
+        ClassData:
             type: object
             properties:
-                message:
+                id:
                     type: string
-            description: Response khi tạo xong giáo viên
-        CreateTeacherRequest:
+                name:
+                    type: string
+                grade:
+                    type: string
+                is_deleted:
+                    type: boolean
+        ClassFilterRequest:
             type: object
             properties:
                 name:
                     type: string
-                email:
+                isDeleted:
+                    type: boolean
+                keyword:
                     type: string
-                classId:
+                minClassTeacher:
                     type: integer
                     format: int32
-                age:
+                maxClassStudentQuantity:
                     type: integer
                     format: int32
-            description: Request để tạo mới giáo viên
-        DeleteTeacherReply:
+        CreateClassReply:
             type: object
             properties:
                 message:
                     type: string
-        FilterTeacherRequest:
+        CreateClassRequest:
             type: object
             properties:
-                maxAge:
-                    type: integer
-                    format: int32
-                minAge:
-                    type: integer
-                    format: int32
-                email:
+                name:
                     type: string
+                grade:
+                    type: string
+            description: kratos proto client ./api/helloworld/v1/class.proto
+        DeleteClassReply:
+            type: object
+            properties:
+                message:
+                    type: string
+        DeleteClassRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        ExportClassExcelReply:
+            type: object
+            properties:
+                file:
+                    type: string
+                    format: bytes
+        GetClassReply:
+            type: object
+            properties:
+                class:
+                    $ref: '#/components/schemas/ClassData'
+                students:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/StudentDataForClass'
+                teachers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/TeacherDataForClass'
+                studentsQuantity:
+                    type: integer
+                    format: int32
+                teachersQuantity:
+                    type: integer
+                    format: int32
         GoogleProtobufAny:
             type: object
             properties:
@@ -171,15 +238,16 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        ListTeachersReply:
+        ListClassReply:
             type: object
             properties:
-                teachers:
+                items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/TeacherReply'
-            description: Response trả về danh sách giáo viên
-        ListTeachersRequest:
+                        $ref: '#/components/schemas/ClassData'
+                total:
+                    type: string
+        ListClassRequest:
             type: object
             properties:
                 page:
@@ -188,9 +256,8 @@ components:
                 pageSize:
                     type: integer
                     format: uint32
-                fitler:
-                    $ref: '#/components/schemas/FilterTeacherRequest'
-            description: Request để lấy danh sách tất cả giáo viên
+                filter:
+                    $ref: '#/components/schemas/ClassFilterRequest'
         Status:
             type: object
             properties:
@@ -207,39 +274,29 @@ components:
                         $ref: '#/components/schemas/GoogleProtobufAny'
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
-        TeacherReply:
+        StudentDataForClass:
             type: object
             properties:
-                id:
-                    type: string
                 name:
                     type: string
-                email:
+        TeacherDataForClass:
+            type: object
+            properties:
+                name:
                     type: string
-                className:
-                    type: string
-                age:
-                    type: integer
-                    format: int32
-            description: Response khi trả về thông tin giáo viên
-        UpdateTeacherReply:
+        UpdateClassReply:
             type: object
             properties:
                 message:
                     type: string
-        UpdateTeacherRequest:
+        UpdateClassRequest:
             type: object
             properties:
                 id:
                     type: string
                 name:
                     type: string
-                email:
-                    type: string
-                age:
-                    type: integer
-                    format: int32
-                classId:
+                grade:
                     type: string
 tags:
-    - name: TeacherService
+    - name: ClassService

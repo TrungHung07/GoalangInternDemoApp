@@ -21,6 +21,7 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationClassServiceCreateClass = "/helloworld.v1.ClassService/CreateClass"
 const OperationClassServiceDeleteClass = "/helloworld.v1.ClassService/DeleteClass"
+const OperationClassServiceExportClassExcel = "/helloworld.v1.ClassService/ExportClassExcel"
 const OperationClassServiceGetClass = "/helloworld.v1.ClassService/GetClass"
 const OperationClassServiceListClass = "/helloworld.v1.ClassService/ListClass"
 const OperationClassServiceUpdateClass = "/helloworld.v1.ClassService/UpdateClass"
@@ -30,6 +31,7 @@ type ClassServiceHTTPServer interface {
 	CreateClass(context.Context, *CreateClassRequest) (*CreateClassReply, error)
 	// DeleteClass Xóa lớp học
 	DeleteClass(context.Context, *DeleteClassRequest) (*DeleteClassReply, error)
+	ExportClassExcel(context.Context, *ExportClassExcelRequest) (*ExportClassExcelReply, error)
 	// GetClass Lấy thông tin chi tiết của một lớp học
 	GetClass(context.Context, *GetClassRequest) (*GetClassReply, error)
 	// ListClass Lấy danh sách lớp học
@@ -45,6 +47,7 @@ func RegisterClassServiceHTTPServer(s *http.Server, srv ClassServiceHTTPServer) 
 	r.PUT("/v1/class/delete", _ClassService_DeleteClass0_HTTP_Handler(srv))
 	r.POST("/v1/class/list", _ClassService_ListClass0_HTTP_Handler(srv))
 	r.GET("/v1/class/{id}", _ClassService_GetClass0_HTTP_Handler(srv))
+	r.GET("/v1/class/export/{id}", _ClassService_ExportClassExcel0_HTTP_Handler(srv))
 }
 
 func _ClassService_CreateClass0_HTTP_Handler(srv ClassServiceHTTPServer) func(ctx http.Context) error {
@@ -157,9 +160,32 @@ func _ClassService_GetClass0_HTTP_Handler(srv ClassServiceHTTPServer) func(ctx h
 	}
 }
 
+func _ClassService_ExportClassExcel0_HTTP_Handler(srv ClassServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ExportClassExcelRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationClassServiceExportClassExcel)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ExportClassExcel(ctx, req.(*ExportClassExcelRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ExportClassExcelReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type ClassServiceHTTPClient interface {
 	CreateClass(ctx context.Context, req *CreateClassRequest, opts ...http.CallOption) (rsp *CreateClassReply, err error)
 	DeleteClass(ctx context.Context, req *DeleteClassRequest, opts ...http.CallOption) (rsp *DeleteClassReply, err error)
+	ExportClassExcel(ctx context.Context, req *ExportClassExcelRequest, opts ...http.CallOption) (rsp *ExportClassExcelReply, err error)
 	GetClass(ctx context.Context, req *GetClassRequest, opts ...http.CallOption) (rsp *GetClassReply, err error)
 	ListClass(ctx context.Context, req *ListClassRequest, opts ...http.CallOption) (rsp *ListClassReply, err error)
 	UpdateClass(ctx context.Context, req *UpdateClassRequest, opts ...http.CallOption) (rsp *UpdateClassReply, err error)
@@ -193,6 +219,19 @@ func (c *ClassServiceHTTPClientImpl) DeleteClass(ctx context.Context, in *Delete
 	opts = append(opts, http.Operation(OperationClassServiceDeleteClass))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ClassServiceHTTPClientImpl) ExportClassExcel(ctx context.Context, in *ExportClassExcelRequest, opts ...http.CallOption) (*ExportClassExcelReply, error) {
+	var out ExportClassExcelReply
+	pattern := "/v1/class/export/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationClassServiceExportClassExcel))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
