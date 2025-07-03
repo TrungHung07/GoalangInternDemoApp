@@ -22,8 +22,10 @@ const _ = http.SupportPackageIsVersion1
 const OperationClassServiceCreateClass = "/helloworld.v1.ClassService/CreateClass"
 const OperationClassServiceDeleteClass = "/helloworld.v1.ClassService/DeleteClass"
 const OperationClassServiceExportClassExcel = "/helloworld.v1.ClassService/ExportClassExcel"
+const OperationClassServiceExportListClassExcel = "/helloworld.v1.ClassService/ExportListClassExcel"
 const OperationClassServiceGetClass = "/helloworld.v1.ClassService/GetClass"
 const OperationClassServiceListClass = "/helloworld.v1.ClassService/ListClass"
+const OperationClassServiceListExportClassExcelData = "/helloworld.v1.ClassService/ListExportClassExcelData"
 const OperationClassServiceUpdateClass = "/helloworld.v1.ClassService/UpdateClass"
 
 type ClassServiceHTTPServer interface {
@@ -32,22 +34,26 @@ type ClassServiceHTTPServer interface {
 	// DeleteClass Xóa lớp học
 	DeleteClass(context.Context, *DeleteClassRequest) (*DeleteClassReply, error)
 	ExportClassExcel(context.Context, *ExportClassExcelRequest) (*ExportClassExcelReply, error)
+	ExportListClassExcel(context.Context, *ExportListClassExcelRequest) (*ExportListClassExcelReply, error)
 	// GetClass Lấy thông tin chi tiết của một lớp học
 	GetClass(context.Context, *GetClassRequest) (*GetClassReply, error)
 	// ListClass Lấy danh sách lớp học
 	ListClass(context.Context, *ListClassRequest) (*ListClassReply, error)
+	ListExportClassExcelData(context.Context, *ListClassExcelReportRequest) (*ListClassExcelReportDataReply, error)
 	// UpdateClass Cập nhật thông tin lớp học
 	UpdateClass(context.Context, *UpdateClassRequest) (*UpdateClassReply, error)
 }
 
 func RegisterClassServiceHTTPServer(s *http.Server, srv ClassServiceHTTPServer) {
 	r := s.Route("/")
-	r.POST("/v1/class", _ClassService_CreateClass0_HTTP_Handler(srv))
-	r.PUT("/v1/class", _ClassService_UpdateClass0_HTTP_Handler(srv))
-	r.PUT("/v1/class/delete", _ClassService_DeleteClass0_HTTP_Handler(srv))
-	r.POST("/v1/class/list", _ClassService_ListClass0_HTTP_Handler(srv))
-	r.GET("/v1/class/{id}", _ClassService_GetClass0_HTTP_Handler(srv))
-	r.GET("/v1/class/export/{id}", _ClassService_ExportClassExcel0_HTTP_Handler(srv))
+	r.POST("api/v1/class", _ClassService_CreateClass0_HTTP_Handler(srv))
+	r.PUT("api/v1/class", _ClassService_UpdateClass0_HTTP_Handler(srv))
+	r.PUT("api/v1/class/delete", _ClassService_DeleteClass0_HTTP_Handler(srv))
+	r.POST("api/v1/class/list", _ClassService_ListClass0_HTTP_Handler(srv))
+	r.GET("api/v1/class/{id}", _ClassService_GetClass0_HTTP_Handler(srv))
+	r.GET("/api/v1/class/export/{id}", _ClassService_ExportClassExcel0_HTTP_Handler(srv))
+	r.GET("api/v1/class/exports/list", _ClassService_ListExportClassExcelData0_HTTP_Handler(srv))
+	r.GET("/api/v1/class/reportList", _ClassService_ExportListClassExcel0_HTTP_Handler(srv))
 }
 
 func _ClassService_CreateClass0_HTTP_Handler(srv ClassServiceHTTPServer) func(ctx http.Context) error {
@@ -182,12 +188,52 @@ func _ClassService_ExportClassExcel0_HTTP_Handler(srv ClassServiceHTTPServer) fu
 	}
 }
 
+func _ClassService_ListExportClassExcelData0_HTTP_Handler(srv ClassServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListClassExcelReportRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationClassServiceListExportClassExcelData)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListExportClassExcelData(ctx, req.(*ListClassExcelReportRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListClassExcelReportDataReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ClassService_ExportListClassExcel0_HTTP_Handler(srv ClassServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ExportListClassExcelRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationClassServiceExportListClassExcel)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ExportListClassExcel(ctx, req.(*ExportListClassExcelRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ExportListClassExcelReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type ClassServiceHTTPClient interface {
 	CreateClass(ctx context.Context, req *CreateClassRequest, opts ...http.CallOption) (rsp *CreateClassReply, err error)
 	DeleteClass(ctx context.Context, req *DeleteClassRequest, opts ...http.CallOption) (rsp *DeleteClassReply, err error)
 	ExportClassExcel(ctx context.Context, req *ExportClassExcelRequest, opts ...http.CallOption) (rsp *ExportClassExcelReply, err error)
+	ExportListClassExcel(ctx context.Context, req *ExportListClassExcelRequest, opts ...http.CallOption) (rsp *ExportListClassExcelReply, err error)
 	GetClass(ctx context.Context, req *GetClassRequest, opts ...http.CallOption) (rsp *GetClassReply, err error)
 	ListClass(ctx context.Context, req *ListClassRequest, opts ...http.CallOption) (rsp *ListClassReply, err error)
+	ListExportClassExcelData(ctx context.Context, req *ListClassExcelReportRequest, opts ...http.CallOption) (rsp *ListClassExcelReportDataReply, err error)
 	UpdateClass(ctx context.Context, req *UpdateClassRequest, opts ...http.CallOption) (rsp *UpdateClassReply, err error)
 }
 
@@ -201,7 +247,7 @@ func NewClassServiceHTTPClient(client *http.Client) ClassServiceHTTPClient {
 
 func (c *ClassServiceHTTPClientImpl) CreateClass(ctx context.Context, in *CreateClassRequest, opts ...http.CallOption) (*CreateClassReply, error) {
 	var out CreateClassReply
-	pattern := "/v1/class"
+	pattern := "api/v1/class"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationClassServiceCreateClass))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -214,7 +260,7 @@ func (c *ClassServiceHTTPClientImpl) CreateClass(ctx context.Context, in *Create
 
 func (c *ClassServiceHTTPClientImpl) DeleteClass(ctx context.Context, in *DeleteClassRequest, opts ...http.CallOption) (*DeleteClassReply, error) {
 	var out DeleteClassReply
-	pattern := "/v1/class/delete"
+	pattern := "api/v1/class/delete"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationClassServiceDeleteClass))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -227,7 +273,7 @@ func (c *ClassServiceHTTPClientImpl) DeleteClass(ctx context.Context, in *Delete
 
 func (c *ClassServiceHTTPClientImpl) ExportClassExcel(ctx context.Context, in *ExportClassExcelRequest, opts ...http.CallOption) (*ExportClassExcelReply, error) {
 	var out ExportClassExcelReply
-	pattern := "/v1/class/export/{id}"
+	pattern := "/api/v1/class/export/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationClassServiceExportClassExcel))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -238,9 +284,22 @@ func (c *ClassServiceHTTPClientImpl) ExportClassExcel(ctx context.Context, in *E
 	return &out, nil
 }
 
+func (c *ClassServiceHTTPClientImpl) ExportListClassExcel(ctx context.Context, in *ExportListClassExcelRequest, opts ...http.CallOption) (*ExportListClassExcelReply, error) {
+	var out ExportListClassExcelReply
+	pattern := "/api/v1/class/reportList"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationClassServiceExportListClassExcel))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *ClassServiceHTTPClientImpl) GetClass(ctx context.Context, in *GetClassRequest, opts ...http.CallOption) (*GetClassReply, error) {
 	var out GetClassReply
-	pattern := "/v1/class/{id}"
+	pattern := "api/v1/class/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationClassServiceGetClass))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -253,7 +312,7 @@ func (c *ClassServiceHTTPClientImpl) GetClass(ctx context.Context, in *GetClassR
 
 func (c *ClassServiceHTTPClientImpl) ListClass(ctx context.Context, in *ListClassRequest, opts ...http.CallOption) (*ListClassReply, error) {
 	var out ListClassReply
-	pattern := "/v1/class/list"
+	pattern := "api/v1/class/list"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationClassServiceListClass))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -264,9 +323,22 @@ func (c *ClassServiceHTTPClientImpl) ListClass(ctx context.Context, in *ListClas
 	return &out, nil
 }
 
+func (c *ClassServiceHTTPClientImpl) ListExportClassExcelData(ctx context.Context, in *ListClassExcelReportRequest, opts ...http.CallOption) (*ListClassExcelReportDataReply, error) {
+	var out ListClassExcelReportDataReply
+	pattern := "api/v1/class/exports/list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationClassServiceListExportClassExcelData))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *ClassServiceHTTPClientImpl) UpdateClass(ctx context.Context, in *UpdateClassRequest, opts ...http.CallOption) (*UpdateClassReply, error) {
 	var out UpdateClassReply
-	pattern := "/v1/class"
+	pattern := "api/v1/class"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationClassServiceUpdateClass))
 	opts = append(opts, http.PathTemplate(pattern))

@@ -13,7 +13,7 @@ service ClassService {
     // Tạo mới lớp học
     rpc CreateClass(CreateClassRequest) returns (CreateClassReply){
         option (google.api.http) = {
-            post : "/v1/class",
+            post : "api/v1/class",
             body : "*"
         };
     }
@@ -21,7 +21,7 @@ service ClassService {
     // Cập nhật thông tin lớp học
     rpc UpdateClass(UpdateClassRequest) returns (UpdateClassReply) {
         option (google.api.http) = {
-            put : "/v1/class",
+            put : "api/v1/class",
             body : "*"
         };
     }
@@ -29,7 +29,7 @@ service ClassService {
     // Xóa lớp học
     rpc DeleteClass(DeleteClassRequest) returns (DeleteClassReply){
         option (google.api.http) = {
-            put : "/v1/class/delete",
+            put : "api/v1/class/delete",
             body : "*"
         };
     }
@@ -37,7 +37,7 @@ service ClassService {
     // Lấy danh sách lớp học
     rpc ListClass(ListClassRequest) returns (ListClassReply){
         option (google.api.http) = {
-            post : "/v1/class/list",
+            post : "api/v1/class/list",
             body : "*"
         };
     }
@@ -45,14 +45,26 @@ service ClassService {
     // Lấy thông tin chi tiết của một lớp học
     rpc GetClass(GetClassRequest) returns (GetClassReply) {
         option (google.api.http) = {
-            get : "/v1/class/{id}",
+            get : "api/v1/class/{id}",
         };
     }
 
    
     rpc ExportClassExcel(ExportClassExcelRequest) returns (ExportClassExcelReply){
         option (google.api.http) = {
-            get : "/v1/class/export/{id}",
+            get : "/api/v1/class/export/{id}",
+        };
+    }
+    
+    rpc ListExportClassExcelData(ListClassExcelReportRequest) returns (ListClassExcelReportDataReply){
+        option (google.api.http) = {
+            get : "api/v1/class/exports/list",
+        };
+    }
+
+    rpc ExportListClassExcel(ExportListClassExcelRequest) returns (ExportListClassExcelReply) {
+        option (google.api.http) = {
+            get : "/api/v1/class/reportList",   
         };
     }
 }

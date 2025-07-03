@@ -32,6 +32,44 @@ message ExportClassExcelReply {
   bytes file = 1;
 }
 
+
+message ListClassExcelReportRequest {
+
+}
+
+message ExportStudentDataForClass {
+    string name = 1; 
+}
+
+message ExportTeacherDataForClass {
+    string name = 1;
+    string email = 2;
+    int32 age = 3;
+}
+
+
+message ExportListClassExcelRequest{
+
+}
+
+message ExportListClassExcelReply{
+    bytes file =1 ;
+}
+
+
+message ListClassExcelReportDataReply {
+    repeated ReportExcelClassData data = 1;
+}
+
+message ReportExcelClassData {
+    ClassData class = 1; // Thông tin lớp học
+    repeated ExportStudentDataForClass students = 2; // Danh sách học sinh trong lớp
+    repeated ExportTeacherDataForClass teachers =3;
+    int32 students_quantity = 4; 
+    int32 teachers_quantity = 5; 
+}
+
+
 message ClassFilterRequest {
     optional string name = 3; // Tên lớp học để lọc
     optional bool is_deleted = 5; // Lọc theo trạng thái xóa
@@ -54,9 +92,14 @@ message StudentDataForClass {
     string name = 2;
 }
 
+
+
+
 message TeacherDataForClass {
     string name = 1;
 }
+
+
 
 
 

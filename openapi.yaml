@@ -6,7 +6,49 @@ info:
     title: ClassService API
     version: 0.0.1
 paths:
-    /v1/class:
+    /api/v1/class/export/{id}:
+        get:
+            tags:
+                - ClassService
+            operationId: ClassService_ExportClassExcel
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExportClassExcelReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/class/reportList:
+        get:
+            tags:
+                - ClassService
+            operationId: ClassService_ExportListClassExcel
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExportListClassExcelReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    api/v1/class:
         put:
             tags:
                 - ClassService
@@ -55,7 +97,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /v1/class/delete:
+    api/v1/class/delete:
         put:
             tags:
                 - ClassService
@@ -80,31 +122,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /v1/class/export/{id}:
+    api/v1/class/exports/list:
         get:
             tags:
                 - ClassService
-            operationId: ClassService_ExportClassExcel
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
+            operationId: ClassService_ListExportClassExcelData
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ExportClassExcelReply'
+                                $ref: '#/components/schemas/ListClassExcelReportDataReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /v1/class/list:
+    api/v1/class/list:
         post:
             tags:
                 - ClassService
@@ -129,7 +165,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /v1/class/{id}:
+    api/v1/class/{id}:
         get:
             tags:
                 - ClassService
@@ -211,6 +247,27 @@ components:
                 file:
                     type: string
                     format: bytes
+        ExportListClassExcelReply:
+            type: object
+            properties:
+                file:
+                    type: string
+                    format: bytes
+        ExportStudentDataForClass:
+            type: object
+            properties:
+                name:
+                    type: string
+        ExportTeacherDataForClass:
+            type: object
+            properties:
+                name:
+                    type: string
+                email:
+                    type: string
+                age:
+                    type: integer
+                    format: int32
         GetClassReply:
             type: object
             properties:
@@ -238,6 +295,13 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        ListClassExcelReportDataReply:
+            type: object
+            properties:
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ReportExcelClassData'
         ListClassReply:
             type: object
             properties:
@@ -258,6 +322,25 @@ components:
                     format: uint32
                 filter:
                     $ref: '#/components/schemas/ClassFilterRequest'
+        ReportExcelClassData:
+            type: object
+            properties:
+                class:
+                    $ref: '#/components/schemas/ClassData'
+                students:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ExportStudentDataForClass'
+                teachers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ExportTeacherDataForClass'
+                studentsQuantity:
+                    type: integer
+                    format: int32
+                teachersQuantity:
+                    type: integer
+                    format: int32
         Status:
             type: object
             properties:

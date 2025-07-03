@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	pb "DemoApp/api/helloworld/v1"
@@ -355,9 +354,10 @@ func (s *ClassServiceService) mapStudents(students []*ent.Student) []*pb.Student
 	return result
 }
 
+// ExportClassExcel geta class from the database with Id
+// It returns a ExportClassExcelReply containing the result for the client
 func (s *ClassServiceService) ExportClassExcel(ctx context.Context, req *pb.ExportClassExcelRequest) (*pb.ExportClassExcelReply, error) {
-
-	// Fetch class data using existing logic
+	// Fetch class data
 	classResp, err := s.GetClass(ctx, &pb.GetClassRequest{Id: req.Id})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get class: %w", err)
@@ -366,54 +366,163 @@ func (s *ClassServiceService) ExportClassExcel(ctx context.Context, req *pb.Expo
 	class := classResp.Class
 	students := classResp.Students
 	teachers := classResp.Teachers
-	// Prepare basic info
-	basicInfo := map[string]interface{}{
-		"Class ID":          class.Id,
-		"Class Name":        class.Name,
-		"Grade":             class.Grade,
-		"Students Quantity": classResp.StudentsQuantity,
-		"Teachers Quantity": classResp.TeachersQuantity,
-	}
 
-	// Prepare student section
-	studentSection := utils.ExcelSection{
-		Title:   "List of Students :",
-		Headers: []string{"Students Name :"},
-	}
+	// Prepare students and teachers name lists
+	var studentNames []string
 	for _, s := range students {
-		studentSection.Data = append(studentSection.Data, map[string]string{
-			"Students Name :": s.Name,
-		})
+		studentNames = append(studentNames, s.Name)
 	}
 
-	// Prepare teacher section
-	teacherSection := utils.ExcelSection{
-		Title:   "List of Teachers :",
-		Headers: []string{"Teachers Name :"},
-	}
+	var teacherNames []string
 	for _, t := range teachers {
-		teacherSection.Data = append(teacherSection.Data, map[string]string{
-			"Teachers Name :": t.Name,
+		teacherNames = append(teacherNames, t.Name)
+	}
+
+	// Build report entry
+	reportEntry := utils.ExcelClassReport{
+		STT:             1,
+		Class:           class.Name,
+		Students:        studentNames,
+		Teachers:        teacherNames,
+		StudentQuantity: int(classResp.StudentsQuantity),
+		TeacherQuantity: int(classResp.TeachersQuantity),
+	}
+
+	// Create Excel file
+	helper := utils.NewExcelHelper()
+	fileBytes, err := helper.ExportClassTableReport("BÁO CÁO ABC", []utils.ExcelClassReport{reportEntry})
+	if err != nil {
+		return nil, fmt.Errorf("failed to export excel: %w", err)
+	}
+
+	// Return as reply
+	return &pb.ExportClassExcelReply{
+		File: fileBytes,
+	}, nil
+}
+
+func (s *ClassServiceService) ListExportClassExcelData(ctx context.Context, req *pb.ListClassExcelReportRequest) (*pb.ListClassExcelReportDataReply, error) {
+	key := "list_report_data"
+	var reply *pb.ListClassExcelReportDataReply
+	val, err := s.getCache(ctx, key)
+	if err == nil && len(val) > 0 {
+		log.Infof("Cache hit")
+		result := &pb.ListClassExcelReportDataReply{}
+		if e := json.Unmarshal(val, reply); e == nil {
+			reply = result
+			return reply, nil
+		}
+	}
+	query := s.s.DB.Class.Query().WithStudents().WithTeachers()
+	entities, e := query.All(ctx)
+	if e != nil {
+		return nil, e
+	}
+	dataList := s.toReportDTOList(entities)
+	reply = &pb.ListClassExcelReportDataReply{
+		Data: dataList,
+	}
+	go func() {
+		if data, err := json.Marshal(reply); err == nil {
+			_ = s.setCache(ctx, key, data)
+		}
+	}()
+	return reply, nil
+}
+
+func (s *ClassServiceService) toReportDTOList(classes []*ent.Class) []*pb.ReportExcelClassData {
+	var result []*pb.ReportExcelClassData
+	for _, c := range classes {
+		result = append(result, s.toReportDTO(c))
+	}
+	return result
+}
+
+func (s *ClassServiceService) toReportDTO(class *ent.Class) *pb.ReportExcelClassData {
+	students := s.mapStudentsForExport(class.Edges.Students)
+	teachers := s.mapTeachersForExport(class.Edges.Teachers)
+
+	return &pb.ReportExcelClassData{
+		Class: &pb.ClassData{
+			Id:    int64(class.ID),
+			Name:  class.Name,
+			Grade: class.Grade,
+		},
+		Students:         students,
+		Teachers:         teachers,
+		StudentsQuantity: int32(len(students)),
+		TeachersQuantity: int32(len(teachers)),
+	}
+}
+
+func (s *ClassServiceService) mapStudentsForExport(entities []*ent.Student) []*pb.ExportStudentDataForClass {
+	var students []*pb.ExportStudentDataForClass
+	for _, stu := range entities {
+		students = append(students, &pb.ExportStudentDataForClass{
+			Name: stu.Name,
+		})
+	}
+	return students
+}
+
+func (s *ClassServiceService) mapTeachersForExport(entities []*ent.Teacher) []*pb.ExportTeacherDataForClass {
+	var teachers []*pb.ExportTeacherDataForClass
+	for _, t := range entities {
+		teachers = append(teachers, &pb.ExportTeacherDataForClass{
+			Name:  t.Name,
+			Email: t.Email,
+			Age:   int32(t.Age),
+		})
+	}
+	return teachers
+}
+
+func (s *ClassServiceService) ExportListClassExcel(ctx context.Context, req *pb.ExportListClassExcelRequest) (*pb.ExportListClassExcelReply, error) {
+	Data, e := s.ListExportClassExcelData(ctx, &pb.ListClassExcelReportRequest{})
+	log.Info(Data)
+	if e != nil {
+		log.Errorf("ListExportClassExcelData failed: %v", e)
+		return nil, e
+	}
+	var excelData []utils.ExcelClassData
+
+	for _, c := range Data.Data {
+		var students []utils.StudentInfo
+		for _, stu := range c.Students {
+			students = append(students, utils.StudentInfo{Name: stu.Name})
+		}
+
+		var teachers []utils.TeacherInfo
+		for _, t := range c.Teachers {
+			teachers = append(teachers, utils.TeacherInfo{
+				Name:  t.Name,
+				Email: t.Email,
+				Age:   int(t.Age),
+			})
+		}
+
+		excelData = append(excelData, utils.ExcelClassData{
+			Class: utils.ClassInfo{
+				ID:    int(c.Class.Id),
+				Name:  c.Class.Name,
+				Grade: int(c.Class.Grade),
+			},
+			Students:         students,
+			Teachers:         teachers,
+			StudentsQuantity: int(c.StudentsQuantity),
+			TeachersQuantity: int(c.TeachersQuantity),
 		})
 	}
 
-	// Prepare report data
-	reportData := &utils.ExcelReportData{
-		Title:     fmt.Sprintf("Class Report - %s", strings.ToUpper(class.Name)),
-		SheetName: "Class Summary",
-		BasicInfo: basicInfo,
-		Sections:  []utils.ExcelSection{studentSection, teacherSection},
-	}
+	helper := utils.NewExcelListHelper()
+	log.Infof("Exporting %d classes to Excel", len(excelData))
 
-	// Generate Excel file bytes
-	helper := utils.NewExcelHelper()
-
-	resultFile, err := helper.ExportReport(reportData)
+	fileBytes, err := helper.ExportClassListExcel(excelData)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.ExportClassExcelReply{
-		File: resultFile,
+	return &pb.ExportListClassExcelReply{
+		File: fileBytes,
 	}, nil
 }
